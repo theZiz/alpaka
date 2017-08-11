@@ -425,7 +425,8 @@ IF(ALPAKA_ACC_GPU_HIP_ENABLE)
 
     ELSE()
 #check if find package requires version for HIP
-        FIND_PACKAGE(HIP "${ALPAKA_HIP_VERSION}")
+#        FIND_PACKAGE(HIP "${ALPAKA_HIP_VERSION}")
+	FIND_PACKAGE(HIP)
         IF(NOT HIP_FOUND)
             MESSAGE(WARNING "Optional alpaka dependency HIP could not be found! HIP back-end disabled!")
             SET(ALPAKA_ACC_GPU_HIP_ENABLE OFF CACHE BOOL "Enable the HIP GPU back-end" FORCE)
