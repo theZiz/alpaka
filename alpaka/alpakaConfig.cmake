@@ -410,6 +410,9 @@ IF(ALPAKA_ACC_GPU_HIP_ENABLE)
         FIND_PACKAGE(CUDA "${ALPAKA_CUDA_VERSION}")
         IF(NOT CUDA_FOUND)
             MESSAGE(WARNING "Optional alpaka dependency CUDA could not be found!")
+	    SET(ALPAKA_ACC_GPU_HIP_ENABLE OFF CACHE BOOL "Enable the HIP GPU back-end" FORCE)
+	ENDIF()
+    ENDIF()		
 #----------------------------------------------------------------------------------
 
     IF(NOT DEFINED ALPAKA_HIP_VERSION)
