@@ -507,7 +507,7 @@ IF(ALPAKA_ACC_GPU_HIP_ENABLE)
                 IF(NOT MSVC)
                     LIST(APPEND HIP_HIPCC_FLAGS "-std=c++11")
 #not compiler flag
-#                    SET(CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}")
+                    SET(HIP_HOST_COMPILER "${CMAKE_CXX_COMPILER}")
                 ENDIF()
 
                 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
