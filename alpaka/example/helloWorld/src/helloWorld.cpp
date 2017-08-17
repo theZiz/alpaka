@@ -98,8 +98,10 @@ auto main()
     using Dim = alpaka::dim::DimInt<3>;
     using Size = std::size_t;
     using Host = alpaka::acc::AccCpuSerial<Dim, Size>;
-    using Acc = alpaka::acc::AccCpuSerial<Dim, Size>;
-    using Stream = alpaka::stream::StreamCpuSync;
+    //using Acc = alpaka::acc::AccCpuSerial<Dim, Size>;
+    //using Stream = alpaka::stream::StreamCpuSync;
+    using Acc = alpaka::acc::AccGpuCudaRt<Dim, Size>;
+    using Stream = alpaka::stream::StreamCudaRtSync;
     using DevAcc = alpaka::dev::Dev<Acc>;
     using DevHost = alpaka::dev::Dev<Host>;
     using PltfHost = alpaka::pltf::Pltf<DevHost>;
