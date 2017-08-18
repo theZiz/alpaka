@@ -30,8 +30,10 @@
 #endif
 
 #include <alpaka/dev/DevCudaRt.hpp>         // dev::DevCudaRt
+#include <alpaka/dev/DevHipRt.hpp>	    // dev::DevHipRt (as of now, the cuda version itself is used)	
 #include <alpaka/vec/Vec.hpp>               // Vec
 #include <alpaka/core/Cuda.hpp>             // cudaMalloc, ...
+#include <alpaka/core/Hip.hpp>		    // cudaMalloc,...  		as of now, just a renamed copy of it's CUDA coutnerpart	
 
 #include <alpaka/dev/Traits.hpp>            // dev::traits::DevType
 #include <alpaka/dim/DimIntegralConst.hpp>  // dim::DimInt<N>

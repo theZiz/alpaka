@@ -32,8 +32,12 @@
 #include <alpaka/stream/StreamCudaRtSync.hpp>   // stream::StreamCudaRtSync
 #include <alpaka/stream/StreamCudaRtAsync.hpp>  // stream::StreamCudaRtAsync
 
+#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
+#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
+
 #include <alpaka/dev/DevCpu.hpp>                // dev::DevCpu
 #include <alpaka/dev/DevCudaRt.hpp>             // dev::DevCudaRt
+#include <alpaka/dev/DevHipRt.hpp>             // dev::DevHipRt (as of now, the CUDA version itself is used)
 #include <alpaka/dim/DimIntegralConst.hpp>      // dim::DimInt<N>
 #include <alpaka/extent/Traits.hpp>             // mem::view::getXXX
 #include <alpaka/mem/view/Traits.hpp>           // mem::view::Copy
@@ -41,6 +45,7 @@
 #include <alpaka/stream/StreamCudaRtSync.hpp>   // stream::StreamCudaRtSync
 
 #include <alpaka/core/Cuda.hpp>                 // cudaMemcpy, ...
+#include <alpaka/core/Hip.hpp>		    // cudaMalloc,...  		as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <cassert>                              // assert
 

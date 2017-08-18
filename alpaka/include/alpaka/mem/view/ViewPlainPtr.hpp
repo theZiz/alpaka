@@ -26,6 +26,7 @@
 #include <alpaka/vec/Vec.hpp>           // Vec<N>
 #include <alpaka/dev/DevCpu.hpp>        // DevCpu
 #include <alpaka/dev/DevCudaRt.hpp>     // DevCudaRt
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 
 namespace alpaka
 {

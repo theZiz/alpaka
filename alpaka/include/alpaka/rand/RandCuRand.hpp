@@ -35,8 +35,10 @@
 #include <alpaka/rand/Traits.hpp>       // CreateNormalReal, ...
 
 #include <alpaka/dev/DevCudaRt.hpp>     // dev::DevCudaRt
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 
 #include <alpaka/core/Cuda.hpp>         // ALPAKA_CUDA_RT_CHECK
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <curand_kernel.h>              // curand_init, ...
 

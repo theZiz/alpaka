@@ -32,6 +32,9 @@
 #include <alpaka/stream/StreamCudaRtSync.hpp>   // stream::StreamCudaRtSync
 #include <alpaka/stream/StreamCudaRtAsync.hpp>  // stream::StreamCudaRtAsync
 
+#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
+#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
+
 #include <alpaka/dev/Traits.hpp>                // dev::getDev
 #include <alpaka/dim/DimIntegralConst.hpp>      // dim::DimInt<N>
 #include <alpaka/extent/Traits.hpp>             // mem::view::getXXX
@@ -39,6 +42,7 @@
 #include <alpaka/stream/Traits.hpp>             // stream::Enqueue
 
 #include <alpaka/core/Cuda.hpp>                 // cudaMemset, ...
+#include <alpaka/core/Hip.hpp>		    // cudaMalloc,...  		as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <cassert>                              // assert
 

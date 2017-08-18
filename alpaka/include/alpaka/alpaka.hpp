@@ -41,6 +41,7 @@
 #include <alpaka/acc/AccCpuOmp2Threads.hpp>
 #include <alpaka/acc/AccCpuOmp4.hpp>
 #include <alpaka/acc/AccGpuCudaRt.hpp>
+#include <alpaka/acc/AccGpuHipRt.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
 #include <alpaka/acc/AccDevProps.hpp>
 #include <alpaka/acc/Traits.hpp>
 
@@ -81,6 +82,8 @@
     #include <alpaka/block/sync/BlockSyncBarrierOmp.hpp>
     #include <alpaka/block/sync/BlockSyncBarrierThread.hpp>
     #include <alpaka/block/sync/BlockSyncCudaBuiltIn.hpp>
+    #include <alpaka/block/sync/BlockSyncHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
+
     #include <alpaka/block/sync/BlockSyncNoOp.hpp>
     #include <alpaka/block/sync/Traits.hpp>
 
@@ -93,6 +96,7 @@
 #include <alpaka/core/Common.hpp>
 #include <alpaka/core/ConcurrentExecPool.hpp>
 #include <alpaka/core/Cuda.hpp>
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 #include <alpaka/core/Debug.hpp>
 #include <alpaka/core/Fibers.hpp>
 #include <alpaka/core/OpenMp.hpp>
@@ -107,6 +111,7 @@
 #include <alpaka/dev/DevCpu.hpp>
 #include <alpaka/dev/cpu/Wait.hpp>
 #include <alpaka/dev/Traits.hpp>
+#include <alpaka/dev/DevHipRt.hpp>
 
 //-----------------------------------------------------------------------------
 // dim
@@ -119,6 +124,7 @@
 // event
 //-----------------------------------------------------------------------------
 #include <alpaka/event/EventCudaRt.hpp>
+#include <alpaka/event/EventHipRt.hpp>
 #include <alpaka/event/EventCpu.hpp>
 #include <alpaka/event/Traits.hpp>
 
@@ -133,6 +139,8 @@
 #include <alpaka/exec/ExecCpuOmp2Threads.hpp>
 #include <alpaka/exec/ExecCpuOmp4.hpp>
 #include <alpaka/exec/ExecGpuCudaRt.hpp>
+#include <alpaka/exec/ExecGpuHipRt.hpp>		// as of now, a renamed copy of it's CUDA counterpart
+
 #include <alpaka/exec/Traits.hpp>
 
 //-----------------------------------------------------------------------------
@@ -144,11 +152,15 @@
 // idx
 //-----------------------------------------------------------------------------
 #include <alpaka/idx/bt/IdxBtCudaBuiltIn.hpp>
+#include <alpaka/idx/bt/IdxBtHipBuiltIn.hpp>	   // IdxBtHipBuiltIn (as of now, just a renamed copy of it's CUDA counterpart)	
+
 #include <alpaka/idx/bt/IdxBtOmp.hpp>
 #include <alpaka/idx/bt/IdxBtRefFiberIdMap.hpp>
 #include <alpaka/idx/bt/IdxBtRefThreadIdMap.hpp>
 #include <alpaka/idx/bt/IdxBtZero.hpp>
 #include <alpaka/idx/gb/IdxGbCudaBuiltIn.hpp>
+#include <alpaka/idx/gb/IdxGbHipBuiltIn.hpp>       // IdxGbHipBuiltIn (as of now, just a renamed copy of it's CUDA counterpart)
+
 #include <alpaka/idx/gb/IdxGbRef.hpp>
 #include <alpaka/idx/Traits.hpp>
 #include <alpaka/idx/MapIdx.hpp>
@@ -211,7 +223,7 @@
 #include <alpaka/pltf/PltfCpu.hpp>
 #include <alpaka/pltf/PltfCudaRt.hpp>
 #include <alpaka/pltf/Traits.hpp>
-
+#include <alpaka/pltf/PltfHipRt.hpp>
 //-----------------------------------------------------------------------------
 // rand
 //-----------------------------------------------------------------------------
@@ -229,6 +241,10 @@
 //-----------------------------------------------------------------------------
 #include <alpaka/stream/StreamCudaRtAsync.hpp>
 #include <alpaka/stream/StreamCudaRtSync.hpp>
+
+#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
+#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
+
 #include <alpaka/stream/StreamCpuAsync.hpp>
 #include <alpaka/stream/StreamCpuSync.hpp>
 #include <alpaka/stream/Traits.hpp>

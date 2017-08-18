@@ -31,14 +31,23 @@
 
 // Base classes.
 #include <alpaka/workdiv/WorkDivCudaBuiltIn.hpp>    // WorkDivCudaBuiltIn
+#include <alpaka/workdiv/WorkDivHipBuiltIn.hpp>    // as of now, just a renamed copy of it's CUDA counterpart
+
 #include <alpaka/idx/gb/IdxGbCudaBuiltIn.hpp>       // IdxGbCudaBuiltIn
+#include <alpaka/idx/gb/IdxGbHipBuiltIn.hpp>       // IdxGbHipBuiltIn (as of now, just a renamed copy of it's CUDA counterpart
+
 #include <alpaka/idx/bt/IdxBtCudaBuiltIn.hpp>       // IdxBtCudaBuiltIn
+#include <alpaka/idx/bt/IdxBtHipBuiltIn.hpp>	   // IdxBtHipBuiltIn (as of now, just a renamed copy of it's CUDA counterpart)
+
 #include <alpaka/atomic/AtomicCudaBuiltIn.hpp>      // AtomicCudaBuiltIn
 #include <alpaka/atomic/AtomicHierarchy.hpp>    // AtomicHierarchy
 #include <alpaka/math/MathCudaBuiltIn.hpp>          // MathCudaBuiltIn
 #include <alpaka/block/shared/dyn/BlockSharedMemDynCudaBuiltIn.hpp> // BlockSharedMemDynCudaBuiltIn
 #include <alpaka/block/shared/st/BlockSharedMemStCudaBuiltIn.hpp>   // BlockSharedMemStCudaBuiltIn
 #include <alpaka/block/sync/BlockSyncCudaBuiltIn.hpp>               // BlockSyncCudaBuiltIn
+#include <alpaka/block/sync/BlockSyncHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
+
+
 #include <alpaka/rand/RandCuRand.hpp>               // RandCuRand
 #include <alpaka/time/TimeCudaBuiltIn.hpp>          // TimeCudaBuiltIn
 
@@ -51,7 +60,9 @@
 
 // Implementation details.
 #include <alpaka/dev/DevCudaRt.hpp>                 // dev::DevCudaRt
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 #include <alpaka/core/Cuda.hpp>                     // ALPAKA_CUDA_RT_CHECK
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <boost/predef.h>                           // workarounds
 
