@@ -86,11 +86,12 @@ auto main()
     using Val = float;
     using Size = std::size_t;
 
-    using Acc = alpaka::acc::AccCpuSerial<alpaka::dim::DimInt<1u>, Size>;
+//    using Acc = alpaka::acc::AccCpuSerial<alpaka::dim::DimInt<1u>, Size>;
+    using Acc = alpaka::acc::AccGpuCudaRt<Dim, Size>;	
     using DevAcc = alpaka::dev::Dev<Acc>;
     using PltfAcc = alpaka::pltf::Pltf<DevAcc>;
-    using StreamAcc = alpaka::stream::StreamCpuSync;
-
+//    using StreamAcc = alpaka::stream::StreamCpuSync;
+    using StreamAcc = alpaka::stream::StreamCudaRtSync;	
     using PltfHost = alpaka::pltf::PltfCpu;
 
     Size const numElements(123456);
