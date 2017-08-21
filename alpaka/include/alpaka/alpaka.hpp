@@ -49,6 +49,8 @@
 // atomic
 //-----------------------------------------------------------------------------
 #include <alpaka/atomic/AtomicCudaBuiltIn.hpp>
+#include <alpaka/atomic/AtomicHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
+
 #include <alpaka/atomic/AtomicNoOp.hpp>
 #include <alpaka/atomic/AtomicOmpCritSec.hpp>
 #include <alpaka/atomic/AtomicStlLock.hpp>
@@ -66,11 +68,13 @@
         //-----------------------------------------------------------------------------
         #include <alpaka/block/shared/dyn/BlockSharedMemDynBoostAlignedAlloc.hpp>
         #include <alpaka/block/shared/dyn/BlockSharedMemDynCudaBuiltIn.hpp>
+        #include <alpaka/block/shared/dyn/BlockSharedMemDynHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart	
         #include <alpaka/block/shared/dyn/Traits.hpp>
         //-----------------------------------------------------------------------------
         // static
         //-----------------------------------------------------------------------------
         #include <alpaka/block/shared/st/BlockSharedMemStCudaBuiltIn.hpp>
+	#include <alpaka/block/shared/st/BlockSharedMemStHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
         #include <alpaka/block/shared/st/BlockSharedMemStMasterSync.hpp>
         #include <alpaka/block/shared/st/BlockSharedMemStNoSync.hpp>
         #include <alpaka/block/shared/st/Traits.hpp>
@@ -174,6 +178,7 @@
 // math
 //-----------------------------------------------------------------------------
 #include <alpaka/math/MathCudaBuiltIn.hpp>
+#include <alpaka/math/MathHipBuiltIn.hpp>	// as of now, just a renamed copy of it's CUDA counterpart
 #include <alpaka/math/MathStl.hpp>
 
 //-----------------------------------------------------------------------------
@@ -228,6 +233,8 @@
 // rand
 //-----------------------------------------------------------------------------
 #include <alpaka/rand/RandCuRand.hpp>
+#include <alpaka/rand/RandHipRand.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
+
 #include <alpaka/rand/RandStl.hpp>
 #include <alpaka/rand/Traits.hpp>
 
