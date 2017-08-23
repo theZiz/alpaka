@@ -34,7 +34,6 @@
 
 #include <alpaka/vec/Vec.hpp>               // Vec, getExtentVecEnd
 #include <alpaka/core/Cuda.hpp>             // getExtent(dim3)
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 //#include <boost/core/ignore_unused.hpp>   // boost::ignore_unused
 

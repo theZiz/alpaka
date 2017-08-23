@@ -189,6 +189,8 @@
 #include <alpaka/mem/alloc/Traits.hpp>
 
 #include <alpaka/mem/buf/BufCudaRt.hpp>
+#include <alpaka/mem/buf/BufHipRt.hpp>	//as of now, just a renamed copy of it's CUDA counterpart
+
 #include <alpaka/mem/buf/BufCpu.hpp>
 #include <alpaka/mem/buf/Traits.hpp>
 

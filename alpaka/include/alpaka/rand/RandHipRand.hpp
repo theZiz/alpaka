@@ -25,19 +25,13 @@
 
 #include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-#endif
-
 // This is not currently supported by the clang native CUDA compiler.
 #if !BOOST_COMP_CLANG_CUDA
 
 #include <alpaka/rand/Traits.hpp>       // CreateNormalReal, ...
 
-#include <alpaka/dev/DevCudaRt.hpp>     // dev::DevCudaRt
 #include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 
-#include <alpaka/core/Cuda.hpp>         // ALPAKA_CUDA_RT_CHECK
 #include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <curand_kernel.h>              // curand_init, ...

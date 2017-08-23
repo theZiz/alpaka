@@ -25,16 +25,11 @@
 
 #include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-//#if !BOOST_LANG_CUDA
-//    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-//#endif
-
 #include <alpaka/dev/Traits.hpp>        // dev::traits::DevType
 #include <alpaka/mem/buf/Traits.hpp>    // mem::buf::traits::BufType
 #include <alpaka/pltf/Traits.hpp>       // pltf::traits::PltfType
 #include <alpaka/wait/Traits.hpp>       // CurrentThreadWaitFor
 
-#include <alpaka/core/Cuda.hpp>         // cudaGetDeviceCount, ...
 #include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 namespace alpaka

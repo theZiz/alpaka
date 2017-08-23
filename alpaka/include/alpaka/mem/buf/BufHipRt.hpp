@@ -21,17 +21,13 @@
 
 #pragma once
 
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+#ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
 #include <alpaka/core/Common.hpp>           // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-#endif
-
-#include <alpaka/dev/DevCudaRt.hpp>         // dev::DevCudaRt	
+#include <alpaka/dev/DevHipRt.hpp>	    // dev::DevHipRt (as of now, the cuda version itself is used)	
 #include <alpaka/vec/Vec.hpp>               // Vec
-#include <alpaka/core/Cuda.hpp>             // cudaMalloc, ...
+#include <alpaka/core/Hip.hpp>		    // cudaMalloc,...  		as of now, just a renamed copy of it's CUDA coutnerpart	
 
 #include <alpaka/dev/Traits.hpp>            // dev::traits::DevType
 #include <alpaka/dim/DimIntegralConst.hpp>  // dim::DimInt<N>
@@ -824,7 +820,8 @@ namespace alpaka
     }
 }
 
-#include <alpaka/mem/buf/cuda/Copy.hpp>
-#include <alpaka/mem/buf/cuda/Set.hpp>
+#include <alpaka/mem/buf/hip/Copy.hpp>		//as of now, just a renamed copy of it's CUDA counterpart
+
+#include <alpaka/mem/buf/hip/Set.hpp>		//as of now, just a renamed copy of it's CUDA counterpart
 
 #endif

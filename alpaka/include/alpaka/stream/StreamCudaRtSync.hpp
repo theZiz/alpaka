@@ -30,7 +30,6 @@
 #endif
 
 #include <alpaka/dev/DevCudaRt.hpp>     // dev::DevCudaRt
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 
 #include <alpaka/dev/Traits.hpp>        // dev::GetDev, dev::DevType
 #include <alpaka/event/Traits.hpp>      // event::EventType
@@ -38,7 +37,6 @@
 #include <alpaka/wait/Traits.hpp>       // CurrentThreadWaitFor, WaiterWaitFor
 
 #include <alpaka/core/Cuda.hpp>         // ALPAKA_CUDA_RT_CHECK
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <stdexcept>                    // std::runtime_error
 #include <memory>                       // std::shared_ptr

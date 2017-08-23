@@ -25,34 +25,6 @@
 
 #include <alpaka/core/Common.hpp>   // BOOST_LANG_CUDA
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-#endif
-
-#include <alpaka/math/abs/AbsCudaBuiltIn.hpp>
-#include <alpaka/math/acos/AcosCudaBuiltIn.hpp>
-#include <alpaka/math/asin/AsinCudaBuiltIn.hpp>
-#include <alpaka/math/atan/AtanCudaBuiltIn.hpp>
-#include <alpaka/math/atan2/Atan2CudaBuiltIn.hpp>
-#include <alpaka/math/cbrt/CbrtCudaBuiltIn.hpp>
-#include <alpaka/math/ceil/CeilCudaBuiltIn.hpp>
-#include <alpaka/math/cos/CosCudaBuiltIn.hpp>
-#include <alpaka/math/erf/ErfCudaBuiltIn.hpp>
-#include <alpaka/math/exp/ExpCudaBuiltIn.hpp>
-#include <alpaka/math/floor/FloorCudaBuiltIn.hpp>
-#include <alpaka/math/fmod/FmodCudaBuiltIn.hpp>
-#include <alpaka/math/log/LogCudaBuiltIn.hpp>
-#include <alpaka/math/max/MaxCudaBuiltIn.hpp>
-#include <alpaka/math/min/MinCudaBuiltIn.hpp>
-#include <alpaka/math/pow/PowCudaBuiltIn.hpp>
-#include <alpaka/math/remainder/RemainderCudaBuiltIn.hpp>
-#include <alpaka/math/round/RoundCudaBuiltIn.hpp>
-#include <alpaka/math/rsqrt/RsqrtCudaBuiltIn.hpp>
-#include <alpaka/math/sin/SinCudaBuiltIn.hpp>
-#include <alpaka/math/sqrt/SqrtCudaBuiltIn.hpp>
-#include <alpaka/math/tan/TanCudaBuiltIn.hpp>
-#include <alpaka/math/trunc/TruncCudaBuiltIn.hpp>
-
 #include <alpaka/math/abs/AbsHipBuiltIn.hpp>	// as of now, just a renamed copy of it's CUDA counterpart
 #include <alpaka/math/acos/AcosHipBuiltIn.hpp>	// as of now, just a renamed copy of it's CUDA counterpart
 #include <alpaka/math/asin/AsinHipBuiltIn.hpp>	// as of now, just a renamed copy of it's CUDA counterpart

@@ -31,10 +31,8 @@
 
 #include <alpaka/dev/Traits.hpp>        // dev::traits::DevType
 #include <alpaka/dev/DevCudaRt.hpp>     // dev::DevCudaRt
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 
 #include <alpaka/core/Cuda.hpp>         // cudaGetDeviceCount, ...
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <iostream>                     // std::cout
 #include <sstream>                      // std::stringstream

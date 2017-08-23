@@ -25,23 +25,15 @@
 
 #include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-//#if !BOOST_LANG_CUDA
-//    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-//#endif
-
-#include <alpaka/dev/DevCudaRt.hpp>             // dev::DevCudaRt
 #include <alpaka/dev/DevHipRt.hpp>		// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 #include <alpaka/dev/Traits.hpp>                // GetDev
 #include <alpaka/event/Traits.hpp>              // event::traits::Test, ...
 #include <alpaka/wait/Traits.hpp>               // CurrentThreadWaitFor
 
-#include <alpaka/stream/StreamCudaRtAsync.hpp>  // stream::StreamCudaRtAsync
-#include <alpaka/stream/StreamCudaRtSync.hpp>   // stream::StreamCudaRtSync
 
 #include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
 #include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
 
-#include <alpaka/core/Cuda.hpp>                 // ALPAKA_CUDA_RT_CHECK
 #include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <stdexcept>                            // std::runtime_error

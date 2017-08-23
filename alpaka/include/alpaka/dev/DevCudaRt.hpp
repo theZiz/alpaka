@@ -35,7 +35,6 @@
 #include <alpaka/wait/Traits.hpp>       // CurrentThreadWaitFor
 
 #include <alpaka/core/Cuda.hpp>         // cudaGetDeviceCount, ...
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 namespace alpaka
 {

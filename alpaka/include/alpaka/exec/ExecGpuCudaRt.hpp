@@ -40,16 +40,11 @@
 
 // Implementation details.
 #include <alpaka/acc/AccGpuCudaRt.hpp>          // acc:AccGpuCudaRt
-#include <alpaka/acc/AccGpuHipRt.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
 
 #include <alpaka/dev/DevCudaRt.hpp>             // dev::DevCudaRt
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 #include <alpaka/kernel/Traits.hpp>             // kernel::getBlockSharedMemDynSizeBytes
 #include <alpaka/stream/StreamCudaRtAsync.hpp>  // stream::StreamCudaRtAsync
 #include <alpaka/stream/StreamCudaRtSync.hpp>   // stream::StreamCudaRtSync
-
-#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
-#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
 
 #include <alpaka/workdiv/WorkDivMembers.hpp>    // workdiv::WorkDivMembers
 
@@ -60,7 +55,6 @@
 #endif
 
 #include <alpaka/core/Cuda.hpp>                 // ALPAKA_CUDA_RT_CHECK
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <alpaka/meta/ApplyTuple.hpp>           // meta::apply
 #include <alpaka/meta/Metafunctions.hpp>        // meta::Conjunction

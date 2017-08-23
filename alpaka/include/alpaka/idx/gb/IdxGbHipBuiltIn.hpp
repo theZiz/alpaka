@@ -25,14 +25,8 @@
 
 #include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-#endif
-
 #include <alpaka/idx/Traits.hpp>            // idx::getIdx
-
 #include <alpaka/vec/Vec.hpp>               // Vec, offset::getOffsetVecEnd
-#include <alpaka/core/Cuda.hpp>             // getOffset(dim3)
 #include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 //#include <boost/core/ignore_unused.hpp>   // boost::ignore_unused

@@ -87,14 +87,14 @@ auto main()
     using Size = std::size_t;
 
 //    using Acc = alpaka::acc::AccCpuSerial<alpaka::dim::DimInt<1u>, Size>;
-    using Acc = alpaka::acc::AccGpuCudaRt<Dim, Size>;	
+    using Acc = alpaka::acc::AccGpuCudaRt<alpaka::dim::DimInt<1u>, Size>;	
     using DevAcc = alpaka::dev::Dev<Acc>;
     using PltfAcc = alpaka::pltf::Pltf<DevAcc>;
 //    using StreamAcc = alpaka::stream::StreamCpuSync;
     using StreamAcc = alpaka::stream::StreamCudaRtSync;	
     using PltfHost = alpaka::pltf::PltfCpu;
 
-    Size const numElements(123456);
+    Size const numElements(12345);
 
     // Create the kernel function object.
     VectorAddKernel kernel;

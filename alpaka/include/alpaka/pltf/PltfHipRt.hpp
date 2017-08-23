@@ -25,15 +25,9 @@
 
 #include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-//#if !BOOST_LANG_CUDA
-//    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-//#endif
-
 #include <alpaka/dev/Traits.hpp>        // dev::traits::DevType
-#include <alpaka/dev/DevCudaRt.hpp>     // dev::DevCudaRt
 #include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
 
-#include <alpaka/core/Cuda.hpp>         // cudaGetDeviceCount, ...
 #include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
 
 #include <iostream>                     // std::cout
