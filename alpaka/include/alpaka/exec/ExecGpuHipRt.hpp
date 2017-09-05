@@ -87,9 +87,9 @@ namespace alpaka
                     TKernelFnObj const kernelFnObj,
                     TArgs ... args)
                 {
-#if BOOST_ARCH_CUDA_DEVICE && (BOOST_ARCH_CUDA_DEVICE < BOOST_VERSION_NUMBER(2, 0, 0))
-    #error "Cuda device capability >= 2.0 is required!"
-#endif
+//#if BOOST_ARCH_CUDA_DEVICE && (BOOST_ARCH_CUDA_DEVICE < BOOST_VERSION_NUMBER(2, 0, 0))
+//    #error "Cuda device capability >= 2.0 is required!"
+//#endif
                     acc::AccGpuCudaRt<TDim, TSize> acc(threadElemExtent);
 
                     kernelFnObj(
@@ -377,7 +377,7 @@ namespace alpaka
 #endif
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
-                    // Log the function attributes.
+/*                    // Log the function attributes.
                     cudaFuncAttributes funcAttrs;
                     cudaFuncGetAttributes(&funcAttrs, exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...>);
                     std::cout << BOOST_CURRENT_FUNCTION
@@ -388,12 +388,12 @@ namespace alpaka
                         << " numRegs: " << funcAttrs.numRegs
                         << " ptxVersion: " << funcAttrs.ptxVersion
                         << " sharedSizeBytes: " << funcAttrs.sharedSizeBytes << " B"
-                        << std::endl;
+                        << std::endl; */
 #endif
 
                     // Set the current device.
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaSetDevice(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipSetDevice(
                             stream.m_spStreamCudaRtAsyncImpl->m_dev.m_iDevice));
                     // Enqueue the kernel execution.
                     // \NOTE: No const reference (const &) is allowed as the parameter type because the kernel launch language extension expects the arguments by value.
@@ -402,11 +402,10 @@ namespace alpaka
                     meta::apply(
                         [&](TArgs ... args)
                         {
-                            exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...><<<
-                                gridDim,
-                                blockDim,
-                                static_cast<std::size_t>(blockSharedMemDynSizeBytes),
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream>>>(
+                        	hipLaunchKernel(HIP_KERNEL_NAME(exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...>),
+                        	dim3(gridDim), dim3(blockDim),
+                           	static_cast<std::size_t>(blockSharedMemDynSizeBytes),
+                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream,
                                     threadElemExtent,
                                     task.m_kernelFnObj,
                                     args...);
@@ -416,10 +415,10 @@ namespace alpaka
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_MINIMAL
                     // Wait for the kernel execution to finish but do not check error return of this call.
                     // Do not use the alpaka::wait method because it checks the error itself but we want to give a custom error message.
-                    cudaStreamSynchronize(
+                    hipStreamSynchronize(
                         stream.m_spStreamCudaRtAsyncImpl->m_CudaStream);
                     std::string const kernelName("'execution of kernel: '" + std::string(typeid(TKernelFnObj).name()) + "' failed with");
-                    ::alpaka::cuda::detail::cudaRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
+                    ::alpaka::cuda::detail::hipRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
 #endif
                 }
             };
@@ -512,8 +511,9 @@ namespace alpaka
 #endif
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
+// cudaFuncAttributes not ported from CUDA to HIP.
                     // Log the function attributes.
-                    cudaFuncAttributes funcAttrs;
+/*                    cudaFuncAttributes funcAttrs;
                     cudaFuncGetAttributes(&funcAttrs, exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...>);
                     std::cout << BOOST_CURRENT_FUNCTION
                         << " binaryVersion: " << funcAttrs.binaryVersion
@@ -523,12 +523,12 @@ namespace alpaka
                         << " numRegs: " << funcAttrs.numRegs
                         << " ptxVersion: " << funcAttrs.ptxVersion
                         << " sharedSizeBytes: " << funcAttrs.sharedSizeBytes << " B"
-                        << std::endl;
+                        << std::endl;*/
 #endif
 
                     // Set the current device.
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaSetDevice(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipSetDevice(
                             stream.m_spStreamCudaRtSyncImpl->m_dev.m_iDevice));
                     // Enqueue the kernel execution.
                     // \NOTE: No const reference (const &) is allowed as the parameter type because the kernel launch language extension expects the arguments by value.
@@ -550,11 +550,11 @@ namespace alpaka
 
                     // Wait for the kernel execution to finish but do not check error return of this call.
                     // Do not use the alpaka::wait method because it checks the error itself but we want to give a custom error message.
-                    cudaStreamSynchronize(
+                    hipStreamSynchronize(
                         stream.m_spStreamCudaRtSyncImpl->m_CudaStream);
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_MINIMAL
                     std::string const kernelName("'execution of kernel: '" + std::string(typeid(TKernelFnObj).name()) + "' failed with");
-                    ::alpaka::cuda::detail::cudaRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
+                    ::alpaka::cuda::detail::hipRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
 #endif
                 }
             };

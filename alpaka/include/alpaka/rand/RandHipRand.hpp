@@ -25,8 +25,8 @@
 
 #include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-// This is not currently supported by the clang native CUDA compiler.
-#if !BOOST_COMP_CLANG_CUDA
+// This is not currently supported by HIP
+#if !BOOST_COMP_HIPCC
 
 #include <alpaka/rand/Traits.hpp>       // CreateNormalReal, ...
 

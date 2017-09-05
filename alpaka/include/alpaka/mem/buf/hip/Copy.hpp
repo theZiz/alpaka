@@ -599,6 +599,7 @@ namespace alpaka
                     //-----------------------------------------------------------------------------
                     //!
                     //-----------------------------------------------------------------------------
+
                     template<
                         typename TViewDst,
                         typename TViewSrc,
@@ -719,11 +720,12 @@ namespace alpaka
                                 static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
 
                         return cudaMemCpy3DPeerParms;
-                    }
+                    } 
                 }
             }
         }
     }
+    
     namespace stream
     {
         namespace traits
@@ -1108,4 +1110,5 @@ namespace alpaka
     }
 }
 
-#endif
+#endif 
+

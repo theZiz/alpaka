@@ -119,7 +119,7 @@ namespace alpaka
                 -> vec::Vec<TDim, TSize>
                 {
                     //boost::ignore_unused(idx);
-                    return vec::cast<TSize>(offset::getOffsetVecEnd<TDim>(blockIdx));
+                    return vec::cast<TSize>(offset::getOffsetVecEnd<TDim>(dim3(hipBlockIdx_x, hipBlockIdx_y, hipBlockIdx_z)));
                 }
             };
         }

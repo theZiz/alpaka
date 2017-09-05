@@ -25,10 +25,6 @@
 
 #include <alpaka/core/Common.hpp>           // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-#endif
-
 #include <alpaka/block/shared/st/Traits.hpp>// AllocVar
 
 #include <type_traits>                      // std::is_trivially_default_constructible, std::is_trivially_destructible

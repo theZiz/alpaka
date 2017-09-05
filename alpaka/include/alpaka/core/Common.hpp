@@ -213,3 +213,171 @@
 #else
     #define ALPAKA_STATIC_DEV_MEM_CONSTANT
 #endif
+
+
+//---------------------------------------HIP------------------------------------------------
+//-----------------------------------------------------------------------------
+// CUDA language detection
+// - clang defines __CUDA__ and __CUDACC__ when compiling CUDA code ('-x cuda')
+// - nvcc defines __CUDACC__ when compiling CUDA code
+//-----------------------------------------------------------------------------
+#if defined(__HIPCC__)
+    #include <hip/hip_runtime.h>
+    #define BOOST_LANG_HIP BOOST_PREDEF_MAKE_10_VVRRP(__HIPCC__)	// cheap hack
+#else
+    #define BOOST_LANG_HIP BOOST_VERSION_NUMBER_NOT_AVAILABLE
+#endif
+
+//-----------------------------------------------------------------------------
+// CUDA device architecture detection
+//-----------------------------------------------------------------------------
+#if defined(__HIPCC__)						       // cheap hack strikes again	
+    #define BOOST_ARCH_HIP_DEVICE BOOST_PREDEF_MAKE_10_VRP(__HIPCC__)
+#else
+    #define BOOST_ARCH_HIP_DEVICE BOOST_VERSION_NUMBER_NOT_AVAILABLE
+#endif
+
+//-----------------------------------------------------------------------------
+// nvcc CUDA compiler detection
+//-----------------------------------------------------------------------------
+#if defined(__HIPCC__)
+    // The __CUDACC_VER__, __CUDACC_VER_MAJOR__, __CUDACC_VER_MINOR__ and __CUDACC_VER_BUILD__
+    // have been added with nvcc 7.5 and have not been available before.
+    #if !defined(__CUDACC_VER_MAJOR__) || !defined(__CUDACC_VER_MINOR__) || !defined(__CUDACC_VER_BUILD__)
+        #define BOOST_COMP_HIPCC BOOST_VERSION_NUMBER_AVAILABLE
+    #else
+        #define BOOST_COMP_HIPCC BOOST_VERSION_NUMBER(__CUDACC_VER_MAJOR__, __CUDACC_VER_MINOR__, __CUDACC_VER_BUILD__)
+    #endif
+#else
+    #define BOOST_COMP_HIPCC BOOST_VERSION_NUMBER_NOT_AVAILABLE
+#endif
+
+//-----------------------------------------------------------------------------
+// clang CUDA compiler detection
+// Currently __CUDA__ is only defined by clang when compiling CUDA code.
+//-----------------------------------------------------------------------------
+//#if defined(__clang__) && defined(__CUDA__)
+//    #define BOOST_COMP_CLANG_CUDA BOOST_COMP_CLANG
+//#else
+//    #define BOOST_COMP_CLANG_CUDA BOOST_VERSION_NUMBER_NOT_AVAILABLE
+//#endif
+
+//-----------------------------------------------------------------------------
+// Boost does not yet correctly identify clang when compiling CUDA code.
+// After explicitly including <boost/config.hpp> we can safely undefine some of the wrong settings.
+//-----------------------------------------------------------------------------
+//#if BOOST_COMP_CLANG_CUDA
+//    #include <boost/config.hpp>
+//    #undef BOOST_NO_CXX11_VARIADIC_TEMPLATES
+//#endif
+
+//-----------------------------------------------------------------------------
+// Boost disables variadic templates for nvcc (in some cases because it was buggy).
+// However, we rely on it being enabled, as it was in all previous boost versions we support.
+// After explicitly including <boost/config.hpp> we can safely undefine the wrong setting.
+//-----------------------------------------------------------------------------
+#if BOOST_COMP_HIPCC
+    #include <boost/config.hpp>
+    #undef BOOST_NO_CXX11_VARIADIC_TEMPLATES
+#endif
+
+//-----------------------------------------------------------------------------
+//! All functions that can be used on an accelerator have to be attributed with ALPAKA_FN_ACC_CUDA_ONLY or ALPAKA_FN_ACC.
+//!
+//! Usage:
+//! ALPAKA_FN_ACC
+//! auto add(std::int32_t a, std::int32_t b)
+//! -> std::int32_t;
+//-----------------------------------------------------------------------------
+#if BOOST_LANG_HIP
+    #define ALPAKA_FN_ACC_CUDA_ONLY __device__
+    #define ALPAKA_FN_ACC_NO_CUDA __host__
+    #if defined(ALPAKA_ACC_GPU_CUDA_ONLY_MODE)
+        #define ALPAKA_FN_ACC __device__
+    #else
+        #define ALPAKA_FN_ACC __device__ __host__
+    #endif
+    #define ALPAKA_FN_HOST_ACC __device__ __host__
+    #define ALPAKA_FN_HOST __host__
+
+#endif
+
+//-----------------------------------------------------------------------------
+//! Disable nvcc warning:
+//! 'calling a __host__ function from __host__ __device__ function.'
+//!
+//! Usage:
+//! ALPAKA_NO_HOST_ACC_WARNING
+//! ALPAKA_FN_HOST_ACC function_declaration()
+//!
+//! WARNING: Only use this method if there is no other way.
+//! Most cases can be solved by #if BOOST_ARCH_CUDA_DEVICE or #if BOOST_LANG_CUDA.
+//-----------------------------------------------------------------------------
+#if BOOST_LANG_HIP && !BOOST_COMP_CLANG_CUDA
+    #if BOOST_COMP_MSVC
+        #define ALPAKA_NO_HOST_ACC_WARNING\
+            __pragma(hd_warning_disable)
+    #else
+        #define ALPAKA_NO_HOST_ACC_WARNING\
+            _Pragma("hd_warning_disable")
+    #endif
+#else
+    #define ALPAKA_NO_HOST_ACC_WARNING
+#endif
+
+//-----------------------------------------------------------------------------
+//! Macro defining the inline function attribute.
+//-----------------------------------------------------------------------------
+#if BOOST_LANG_HIP
+    #define ALPAKA_FN_INLINE __forceinline__
+#else
+    #define ALPAKA_FN_INLINE inline
+#endif
+
+//-----------------------------------------------------------------------------
+//! This macro defines a variable lying in global accelerator device memory.
+//!
+//! Example:
+//!   ALPAKA_STATIC_DEV_MEM_GLOBAL int i;
+//!
+//! Those variables behave like ordinary variables when used in file-scope.
+//! They have external linkage (are accessible from other compilation units).
+//! If you want to access it from a different compilation unit, you have to declare it as extern:
+//!   extern ALPAKA_STATIC_DEV_MEM_GLOBAL int i;
+//! Like ordinary variables, only one definition is allowed (ODR)
+//! Failure to do so might lead to linker errors.
+//!
+//! In contrast to ordinary variables, you can not define such variables
+//! as static compilation unit local variables with internal linkage
+//! because this is forbidden by CUDA.
+//-----------------------------------------------------------------------------
+#if BOOST_LANG_HIP && BOOST_ARCH_HIP_DEVICE
+    #define ALPAKA_STATIC_DEV_MEM_GLOBAL __device__
+#else
+    #define ALPAKA_STATIC_DEV_MEM_GLOBAL
+#endif
+
+//-----------------------------------------------------------------------------
+//! This macro defines a variable lying in constant accelerator device memory.
+//!
+//! Example:
+//!   ALPAKA_STATIC_DEV_MEM_CONSTANT int i;
+//!
+//! Those variables behave like ordinary variables when used in file-scope.
+//! They have external linkage (are accessible from other compilation units).
+//! If you want to access it from a different compilation unit, you have to declare it as extern:
+//!   extern ALPAKA_STATIC_DEV_MEM_CONSTANT int i;
+//! Like ordinary variables, only one definition is allowed (ODR)
+//! Failure to do so might lead to linker errors.
+//!
+//! In contrast to ordinary variables, you can not define such variables
+//! as static compilation unit local variables with internal linkage
+//! because this is forbidden by CUDA.
+//-----------------------------------------------------------------------------
+#if BOOST_LANG_HIP && BOOST_ARCH_HIP_DEVICE
+    #define ALPAKA_STATIC_DEV_MEM_CONSTANT __constant__
+#else
+    #define ALPAKA_STATIC_DEV_MEM_CONSTANT
+#endif
+
+

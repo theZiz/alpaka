@@ -66,8 +66,8 @@ namespace alpaka
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                         // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipSetDevice(
                                 m_dev.m_iDevice));
                         // Create the event on the current device with the specified flags. Valid flags include:
                         // - cudaEventDefault: Default event creation flag.
@@ -75,10 +75,10 @@ namespace alpaka
                         //   A host thread that uses cudaEventSynchronize() to wait on an event created with this flag will block until the event actually completes.
                         // - cudaEventDisableTiming : Specifies that the created event does not need to record timing data.
                         //   Events created with this flag specified and the cudaEventBlockingSync flag not specified will provide the best performance when used with cudaStreamWaitEvent() and cudaEventQuery().
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaEventCreateWithFlags(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipEventCreateWithFlags(
                                 &m_CudaEvent,
-                                (bBusyWait ? cudaEventDefault : cudaEventBlockingSync) | cudaEventDisableTiming));
+                                (bBusyWait ? hipEventDefault : hipEventBlockingSync) | hipEventDisableTiming));
                     }
                     //-----------------------------------------------------------------------------
                     //! Copy constructor.
@@ -104,18 +104,18 @@ namespace alpaka
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                         // Set the current device. \TODO: Is setting the current device before cudaEventDestroy required?
-                        ALPAKA_CUDA_RT_CHECK(cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(hipSetDevice(
                             m_dev.m_iDevice));
                         // In case event has been recorded but has not yet been completed when cudaEventDestroy() is called, the function will return immediately
                         // and the resources associated with event will be released automatically once the device has completed event.
                         // -> No need to synchronize here.
-                        ALPAKA_CUDA_RT_CHECK(cudaEventDestroy(
+                        ALPAKA_HIP_RT_CHECK(hipEventDestroy(
                             m_CudaEvent));
                     }
 
                 public:
                     dev::DevCudaRt const m_dev;   //!< The device this event is bound to.
-                    cudaEvent_t m_CudaEvent;
+                    hipEvent_t m_CudaEvent;
                 };
             }
         }
@@ -249,12 +249,12 @@ namespace alpaka
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     // Query is allowed even for events on non current device.
-                    cudaError_t ret = cudaSuccess;
-                    ALPAKA_CUDA_RT_CHECK_IGNORE(
-                        ret = cudaEventQuery(
+                    hipError_t ret = hipSuccess;
+                    ALPAKA_HIP_RT_CHECK_IGNORE(
+                        ret = hipEventQuery(
                             event.m_spEventCudaImpl->m_CudaEvent),
-                        cudaErrorNotReady);
-                    return (ret == cudaSuccess);
+                        hipErrorNotReady);
+                    return (ret == hipSuccess);
                 }
             };
         }
@@ -281,7 +281,7 @@ namespace alpaka
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
-                    ALPAKA_CUDA_RT_CHECK(cudaEventRecord(
+                    ALPAKA_HIP_RT_CHECK(hipEventRecord(
                         event.m_spEventCudaImpl->m_CudaEvent,
                         stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
                 }
@@ -304,7 +304,7 @@ namespace alpaka
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
-                    ALPAKA_CUDA_RT_CHECK(cudaEventRecord(
+                    ALPAKA_HIP_RT_CHECK(hipEventRecord(
                         event.m_spEventCudaImpl->m_CudaEvent,
                         stream.m_spStreamCudaRtSyncImpl->m_CudaStream));
                 }
@@ -335,7 +335,7 @@ namespace alpaka
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     // Sync is allowed even for events on non current device.
-                    ALPAKA_CUDA_RT_CHECK(cudaEventSynchronize(
+                    ALPAKA_HIP_RT_CHECK(hipEventSynchronize(
                         event.m_spEventCudaImpl->m_CudaEvent));
                 }
             };
@@ -357,7 +357,7 @@ namespace alpaka
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
-                    ALPAKA_CUDA_RT_CHECK(cudaStreamWaitEvent(
+                    ALPAKA_HIP_RT_CHECK(hipStreamWaitEvent(
                         stream.m_spStreamCudaRtAsyncImpl->m_CudaStream,
                         event.m_spEventCudaImpl->m_CudaEvent,
                         0));
@@ -381,7 +381,7 @@ namespace alpaka
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
-                    ALPAKA_CUDA_RT_CHECK(cudaStreamWaitEvent(
+                    ALPAKA_HIP_RT_CHECK(hipStreamWaitEvent(
                         stream.m_spStreamCudaRtSyncImpl->m_CudaStream,
                         event.m_spEventCudaImpl->m_CudaEvent,
                         0));
@@ -408,11 +408,11 @@ namespace alpaka
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     // Set the current device.
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaSetDevice(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipSetDevice(
                             dev.m_iDevice));
 
-                    ALPAKA_CUDA_RT_CHECK(cudaStreamWaitEvent(
+                    ALPAKA_HIP_RT_CHECK(hipStreamWaitEvent(
                         0,
                         event.m_spEventCudaImpl->m_CudaEvent,
                         0));

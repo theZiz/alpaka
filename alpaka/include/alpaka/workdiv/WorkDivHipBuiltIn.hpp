@@ -25,10 +25,6 @@
 
 #include <alpaka/core/Common.hpp>           // ALPAKA_FN_*, BOOST_LANG_CUDA
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
-#endif
-
 #include <alpaka/workdiv/Traits.hpp>        // workdiv::GetWorkDiv
 #include <alpaka/size/Traits.hpp>           // size::Size
 
@@ -144,7 +140,7 @@ namespace alpaka
                 -> vec::Vec<TDim, TSize>
                 {
                     //boost::ignore_unused(workDiv);
-                    return vec::cast<TSize>(extent::getExtentVecEnd<TDim>(gridDim));
+                    return vec::cast<TSize>(extent::getExtentVecEnd<TDim>(dim3(hipGridDim_x ,hipGridDim_y ,hipGridDim_z)));
                 }
             };
 
@@ -167,7 +163,7 @@ namespace alpaka
                 -> vec::Vec<TDim, TSize>
                 {
                     //boost::ignore_unused(workDiv);
-                    return vec::cast<TSize>(extent::getExtentVecEnd<TDim>(blockDim));
+                    return vec::cast<TSize>(extent::getExtentVecEnd<TDim>(dim3(hipBlockDim_x,hipBlockDim_y,hipBlockDim_z)));
                 }
             };
 

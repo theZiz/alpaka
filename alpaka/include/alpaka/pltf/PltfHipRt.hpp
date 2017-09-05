@@ -86,7 +86,7 @@ namespace alpaka
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
                     int iNumDevices(0);
-                    ALPAKA_CUDA_RT_CHECK(cudaGetDeviceCount(&iNumDevices));
+                    ALPAKA_HIP_RT_CHECK(hipGetDeviceCount(&iNumDevices));
 
                     return static_cast<std::size_t>(iNumDevices);
                 }
@@ -124,8 +124,8 @@ namespace alpaka
 
                         // Log this device.
     #if ALPAKA_DEBUG >= ALPAKA_DEBUG_MINIMAL
-                        cudaDeviceProp devProp;
-                        ALPAKA_CUDA_RT_CHECK(cudaGetDeviceProperties(&devProp, dev.m_iDevice));
+                        hipDeviceProp_t devProp;
+                        ALPAKA_HIP_RT_CHECK(hipGetDeviceProperties(&devProp, dev.m_iDevice));
     #endif
     #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
                         printDeviceProperties(devProp);
@@ -151,32 +151,32 @@ namespace alpaka
                     std::size_t iDevice)
                 -> bool
                 {
-                    cudaError rc(cudaSetDevice(static_cast<int>(iDevice)));
+                    hipError_t rc(hipSetDevice(static_cast<int>(iDevice)));
 
-                    cudaStream_t stream = {};
+                    hipStream_t stream = {};
                     // Create a dummy stream to check if the device is already used by an other process.
                     // cudaSetDevice never returns an error if another process already uses the selected device and gpu compute mode is set "process exclusive".
                     // \TODO: Check if this workaround is needed!
-                    if(rc == cudaSuccess)
+                    if(rc == hipSuccess)
                     {
-                        rc = cudaStreamCreate(&stream);
+                        rc = hipStreamCreate(&stream);
                     }
 
-                    if(rc == cudaSuccess)
+                    if(rc == hipSuccess)
                     {
                         // Destroy the dummy stream.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaStreamDestroy(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipStreamDestroy(
                                 stream));
                         return true;
                     }
                     else
                     {
                         // Return the previous error from cudaStreamCreate.
-                        ALPAKA_CUDA_RT_CHECK(
+                        ALPAKA_HIP_RT_CHECK(
                             rc);
                         // Reset the Error state.
-                        cudaGetLastError();
+                        hipGetLastError();
 
                         return false;
                     }
@@ -187,7 +187,7 @@ namespace alpaka
                 //! Prints all the device properties to std::cout.
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto printDeviceProperties(
-                    cudaDeviceProp const & devProp)
+                    hipDeviceProp const & devProp)
                 -> void
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;

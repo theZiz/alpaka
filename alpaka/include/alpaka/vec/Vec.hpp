@@ -455,7 +455,7 @@ namespace alpaka
                 TFnObj const & f) const
 #ifdef BOOST_NO_CXX14_RETURN_TYPE_DEDUCTION
             -> decltype(
-#if (BOOST_COMP_GNUC && (BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(5, 0, 0))) || BOOST_COMP_INTEL || BOOST_COMP_NVCC
+#if (BOOST_COMP_GNUC && (BOOST_COMP_GNUC < BOOST_VERSION_NUMBER(5, 0, 0))) || BOOST_COMP_INTEL || BOOST_COMP_NVCC || BOOST_COMP_HIPCC
                 this->foldrByIndices(
 #else
                 foldrByIndices(

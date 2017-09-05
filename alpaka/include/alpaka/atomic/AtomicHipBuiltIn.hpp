@@ -189,9 +189,9 @@ namespace alpaka
                     double const & value)
                 -> double
                 {
-#if BOOST_ARCH_CUDA_DEVICE >= BOOST_VERSION_NUMBER(6, 0, 0)
+//#if BOOST_ARCH_CUDA_DEVICE >= BOOST_VERSION_NUMBER(6, 0, 0)
                     return atomicAdd(addr, value);
-#else
+/*#else
                     // Code from: http://docs.nvidia.com/cuda/cuda-c-programming-guide/#atomic-functions
 
                     unsigned long long int * address_as_ull(reinterpret_cast<unsigned long long int *>(addr));
@@ -208,7 +208,7 @@ namespace alpaka
                     }
                     while(assumed != old);
                     return __longlong_as_double(static_cast<long long>(old));
-#endif
+#endif */
                 }
             };
             //-----------------------------------------------------------------------------

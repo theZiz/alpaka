@@ -174,30 +174,30 @@ namespace alpaka
                     dev::DevCudaRt const & dev)
                 -> acc::AccDevProps<TDim, TSize>
                 {
-                    cudaDeviceProp cudaDevProp;
-                    ALPAKA_CUDA_RT_CHECK(cudaGetDeviceProperties(
-                        &cudaDevProp,
+                    hipDeviceProp_t hipDevProp;
+                    ALPAKA_HIP_RT_CHECK(hipGetDeviceProperties(
+                        &hipDevProp,
                         dev.m_iDevice));
 
                     return {
                         // m_multiProcessorCount
-                        static_cast<TSize>(cudaDevProp.multiProcessorCount),
+                        static_cast<TSize>(hipDevProp.multiProcessorCount),
                         // m_gridBlockExtentMax
                         extent::getExtentVecEnd<TDim>(
                             vec::Vec<dim::DimInt<3u>, TSize>(
-                                static_cast<TSize>(cudaDevProp.maxGridSize[2]),
-                                static_cast<TSize>(cudaDevProp.maxGridSize[1]),
-                                static_cast<TSize>(cudaDevProp.maxGridSize[0]))),
+                                static_cast<TSize>(hipDevProp.maxGridSize[2]),
+                                static_cast<TSize>(hipDevProp.maxGridSize[1]),
+                                static_cast<TSize>(hipDevProp.maxGridSize[0]))),
                         // m_gridBlockCountMax
                         std::numeric_limits<TSize>::max(),
                         // m_blockThreadExtentMax
                         extent::getExtentVecEnd<TDim>(
                             vec::Vec<dim::DimInt<3u>, TSize>(
-                                static_cast<TSize>(cudaDevProp.maxThreadsDim[2]),
-                                static_cast<TSize>(cudaDevProp.maxThreadsDim[1]),
-                                static_cast<TSize>(cudaDevProp.maxThreadsDim[0]))),
+                                static_cast<TSize>(hipDevProp.maxThreadsDim[2]),
+                                static_cast<TSize>(hipDevProp.maxThreadsDim[1]),
+                                static_cast<TSize>(hipDevProp.maxThreadsDim[0]))),
                         // m_blockThreadCountMax
-                        static_cast<TSize>(cudaDevProp.maxThreadsPerBlock),
+                        static_cast<TSize>(hipDevProp.maxThreadsPerBlock),
                         // m_threadElemExtentMax
                         vec::Vec<TDim, TSize>::all(std::numeric_limits<TSize>::max()),
                         // m_threadElemCountMax

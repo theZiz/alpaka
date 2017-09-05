@@ -117,13 +117,13 @@ namespace alpaka
                     dev::DevCudaRt const & dev)
                 -> std::string
                 {
-                    cudaDeviceProp cudaDevProp;
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaGetDeviceProperties(
-                            &cudaDevProp,
+                    hipDeviceProp_t hipDevProp;
+                    ALPAKA_HIP_RT_CHECK(
+                        hipGetDeviceProperties(
+                            &hipDevProp,
                             dev.m_iDevice));
 
-                    return std::string(cudaDevProp.name);
+                    return std::string(hipDevProp.name);
                 }
             };
 
@@ -142,16 +142,16 @@ namespace alpaka
                 -> std::size_t
                 {
                     // Set the current device to wait for.
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaSetDevice(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipSetDevice(
                             dev.m_iDevice));
 
                     std::size_t freeInternal(0u);
                     std::size_t totalInternal(0u);
 
                     // \TODO: Check which is faster: cudaMemGetInfo().totalInternal vs cudaGetDeviceProperties().totalGlobalMem
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaMemGetInfo(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipMemGetInfo(
                             &freeInternal,
                             &totalInternal));
 
@@ -174,15 +174,15 @@ namespace alpaka
                 -> std::size_t
                 {
                     // Set the current device to wait for.
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaSetDevice(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipSetDevice(
                             dev.m_iDevice));
 
                     std::size_t freeInternal(0u);
                     std::size_t totalInternal(0u);
 
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaMemGetInfo(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipMemGetInfo(
                             &freeInternal,
                             &totalInternal));
 
@@ -207,11 +207,11 @@ namespace alpaka
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
                     // Set the current device to wait for.
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaSetDevice(
+                    ALPAKA_HIP_RT_CHECK(
+                        hipSetDevice(
                             dev.m_iDevice));
-                    ALPAKA_CUDA_RT_CHECK(
-                        cudaDeviceReset());
+                    ALPAKA_HIP_RT_CHECK(
+                        hipDeviceReset());
                 }
             };
         }
@@ -285,9 +285,9 @@ namespace alpaka
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
                     // Set the current device to wait for.
-                    ALPAKA_CUDA_RT_CHECK(cudaSetDevice(
+                    ALPAKA_HIP_RT_CHECK(hipSetDevice(
                         dev.m_iDevice));
-                    ALPAKA_CUDA_RT_CHECK(cudaDeviceSynchronize());
+                    ALPAKA_HIP_RT_CHECK(hipDeviceSynchronize());
                 }
             };
         }

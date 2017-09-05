@@ -71,8 +71,8 @@ namespace alpaka
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                         // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipSetDevice(
                                 m_dev.m_iDevice));
                         // - cudaStreamDefault: Default stream creation flag.
                         // - cudaStreamNonBlocking: Specifies that work running in the created stream may run concurrently with work in stream 0 (the NULL stream),
@@ -80,10 +80,10 @@ namespace alpaka
                         // Create the stream on the current device.
                         // NOTE: cudaStreamNonBlocking is required to match the semantic implemented in the alpaka CPU stream.
                         // It would be too much work to implement implicit default stream synchronization on CPU.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaStreamCreateWithFlags(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipStreamCreateWithFlags(
                                 &m_CudaStream,
-                                cudaStreamNonBlocking));
+                                hipStreamNonBlocking));
                     }
                     //-----------------------------------------------------------------------------
                     //! Copy constructor.
@@ -109,20 +109,20 @@ namespace alpaka
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                         // Set the current device. \TODO: Is setting the current device before cudaStreamDestroy required?
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipSetDevice(
                                 m_dev.m_iDevice));
                         // In case the device is still doing work in the stream when cudaStreamDestroy() is called, the function will return immediately
                         // and the resources associated with stream will be released automatically once the device has completed all work in stream.
                         // -> No need to synchronize here.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaStreamDestroy(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipStreamDestroy(
                                 m_CudaStream));
                     }
 
                 public:
                     dev::DevCudaRt const m_dev;   //!< The device this stream is bound to.
-                    cudaStream_t m_CudaStream;
+                    hipStream_t m_CudaStream;
                 };
             }
         }
@@ -250,12 +250,12 @@ namespace alpaka
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     // Query is allowed even for streams on non current device.
-                    cudaError_t ret = cudaSuccess;
-                    ALPAKA_CUDA_RT_CHECK_IGNORE(
-                        ret = cudaStreamQuery(
+                    hipError_t ret = hipSuccess;
+                    ALPAKA_HIP_RT_CHECK_IGNORE(
+                        ret = hipStreamQuery(
                             stream.m_spStreamCudaRtSyncImpl->m_CudaStream),
-                        cudaErrorNotReady);
-                    return (ret == cudaSuccess);
+                        hipErrorNotReady);
+                    return (ret == hipSuccess);
                 }
             };
         }
@@ -283,7 +283,7 @@ namespace alpaka
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     // Sync is allowed even for streams on non current device.
-                    ALPAKA_CUDA_RT_CHECK(cudaStreamSynchronize(
+                    ALPAKA_HIP_RT_CHECK(hipStreamSynchronize(
                         stream.m_spStreamCudaRtSyncImpl->m_CudaStream));
                 }
             };

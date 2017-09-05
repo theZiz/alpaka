@@ -36,6 +36,10 @@
 #include <cassert>                          // assert
 #include <memory>                           // std::shared_ptr
 
+#include <cuda_runtime.h>		    // temporary fix
+
+
+
 namespace alpaka
 {
     namespace dev
@@ -476,8 +480,8 @@ namespace alpaka
                     {
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
-                        cudaExtent const cudaExtentVal(
-                            make_cudaExtent(
+                         cudaExtent const cudaExtentVal(
+                             make_cudaExtent(
                                 static_cast<std::size_t>(extent::getWidth(extent) * static_cast<TSize>(sizeof(T))),
                                 static_cast<std::size_t>(extent::getHeight(extent)),
                                 static_cast<std::size_t>(extent::getDepth(extent))));
