@@ -23,10 +23,10 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
+#if !defined(__HIPCC__)
+    #error If ALPAKA_ACC_GPU_HIP_ENABLED is set, the compiler has to support HIP!
 #endif
 
 #include <alpaka/math/abs/Traits.hpp>   // Abs
@@ -43,27 +43,27 @@ namespace alpaka
         //#############################################################################
         //! The standard library abs.
         //#############################################################################
-        class AbsCudaBuiltIn
+        class AbsHipBuiltIn
         {
         public:
-            using AbsBase = AbsCudaBuiltIn;
+            using AbsBase = AbsHipBuiltIn;
         };
 
         namespace traits
         {
             //#############################################################################
-            //! The CUDA built in abs trait specialization.
+            //! The HIP built in abs trait specialization.
             //#############################################################################
             template<
                 typename TArg>
             struct Abs<
-                AbsCudaBuiltIn,
+                AbsHipBuiltIn,
                 TArg,
                 typename std::enable_if<
                     std::is_floating_point<TArg>::value>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto abs(
-                    AbsCudaBuiltIn const & /*abs*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto abs(
+                    AbsHipBuiltIn const & /*abs*/,
                     TArg const & arg)
                 -> decltype(::abs(arg))
                 {

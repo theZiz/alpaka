@@ -23,10 +23,10 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
+#if !defined(__HIPCC__)
+    #error If ALPAKA_ACC_GPU_HIP_ENABLED is set, the compiler has to support HIP!
 #endif
 
 #include <alpaka/math/atan2/Traits.hpp> // Atan2
@@ -43,10 +43,10 @@ namespace alpaka
         //#############################################################################
         //! The standard library atan2.
         //#############################################################################
-        class Atan2CudaBuiltIn
+        class Atan2HipBuiltIn
         {
         public:
-            using Atan2Base = Atan2CudaBuiltIn;
+            using Atan2Base = Atan2HipBuiltIn;
         };
 
         namespace traits
@@ -58,15 +58,15 @@ namespace alpaka
                 typename Ty,
                 typename Tx>
             struct Atan2<
-                Atan2CudaBuiltIn,
+                Atan2HipBuiltIn,
                 Ty,
                 Tx,
                 typename std::enable_if<
                     std::is_floating_point<Ty>::value
                     && std::is_floating_point<Tx>::value>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto atan2(
-                    Atan2CudaBuiltIn const & /*abs*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto atan2(
+                    Atan2HipBuiltIn const & /*abs*/,
                     Ty const & y,
                     Tx const & x)
                 -> decltype(::atan2(y, x))

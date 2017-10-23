@@ -23,18 +23,18 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, __HIPCC__
 
-#include <alpaka/dev/DevHipRt.hpp>		// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>		// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
 #include <alpaka/dev/Traits.hpp>                // GetDev
 #include <alpaka/event/Traits.hpp>              // event::traits::Test, ...
 #include <alpaka/wait/Traits.hpp>               // CurrentThreadWaitFor
 
 
-#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
-#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
+#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's HIP counterpart)
+#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's HIP counterpart)
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
 
 #include <stdexcept>                            // std::runtime_error
 #include <memory>                               // std::shared_ptr
@@ -44,24 +44,24 @@ namespace alpaka
 {
     namespace event
     {
-        namespace cuda
+        namespace hip
         {
             namespace detail
             {
                 //#############################################################################
-                //! The CUDA RT device event implementation.
+                //! The HIP RT device event implementation.
                 //#############################################################################
-                class EventCudaImpl final
+                class EventHipImpl final
                 {
                 public:
                     //-----------------------------------------------------------------------------
                     //! Constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST EventCudaImpl(
-                        dev::DevCudaRt const & dev,
+                    ALPAKA_FN_HOST EventHipImpl(
+                        dev::DevHipRt const & dev,
                         bool bBusyWait) :
                             m_dev(dev),
-                            m_CudaEvent()
+                            m_HipEvent()
                     {
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
@@ -70,100 +70,100 @@ namespace alpaka
                             hipSetDevice(
                                 m_dev.m_iDevice));
                         // Create the event on the current device with the specified flags. Valid flags include:
-                        // - cudaEventDefault: Default event creation flag.
-                        // - cudaEventBlockingSync : Specifies that event should use blocking synchronization.
-                        //   A host thread that uses cudaEventSynchronize() to wait on an event created with this flag will block until the event actually completes.
-                        // - cudaEventDisableTiming : Specifies that the created event does not need to record timing data.
-                        //   Events created with this flag specified and the cudaEventBlockingSync flag not specified will provide the best performance when used with cudaStreamWaitEvent() and cudaEventQuery().
+                        // - hipEventDefault: Default event creation flag.
+                        // - hipEventBlockingSync : Specifies that event should use blocking synchronization.
+                        //   A host thread that uses hipEventSynchronize() to wait on an event created with this flag will block until the event actually completes.
+                        // - hipEventDisableTiming : Specifies that the created event does not need to record timing data.
+                        //   Events created with this flag specified and the hipEventBlockingSync flag not specified will provide the best performance when used with hipStreamWaitEvent() and hipEventQuery().
                         ALPAKA_HIP_RT_CHECK(
                             hipEventCreateWithFlags(
-                                &m_CudaEvent,
+                                &m_HipEvent,
                                 (bBusyWait ? hipEventDefault : hipEventBlockingSync) | hipEventDisableTiming));
                     }
                     //-----------------------------------------------------------------------------
                     //! Copy constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST EventCudaImpl(EventCudaImpl const &) = delete;
+                    ALPAKA_FN_HOST EventHipImpl(EventHipImpl const &) = delete;
                     //-----------------------------------------------------------------------------
                     //! Move constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST EventCudaImpl(EventCudaImpl &&) = default;
+                    ALPAKA_FN_HOST EventHipImpl(EventHipImpl &&) = default;
                     //-----------------------------------------------------------------------------
                     //! Copy assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST auto operator=(EventCudaImpl const &) -> EventCudaImpl & = delete;
+                    ALPAKA_FN_HOST auto operator=(EventHipImpl const &) -> EventHipImpl & = delete;
                     //-----------------------------------------------------------------------------
                     //! Move assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST auto operator=(EventCudaImpl &&) -> EventCudaImpl & = default;
+                    ALPAKA_FN_HOST auto operator=(EventHipImpl &&) -> EventHipImpl & = default;
                     //-----------------------------------------------------------------------------
                     //! Destructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST ~EventCudaImpl()
+                    ALPAKA_FN_HOST ~EventHipImpl()
                     {
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
-                        // Set the current device. \TODO: Is setting the current device before cudaEventDestroy required?
+                        // Set the current device. \TODO: Is setting the current device before hipEventDestroy required?
                         ALPAKA_HIP_RT_CHECK(hipSetDevice(
                             m_dev.m_iDevice));
-                        // In case event has been recorded but has not yet been completed when cudaEventDestroy() is called, the function will return immediately
+                        // In case event has been recorded but has not yet been completed when hipEventDestroy() is called, the function will return immediately
                         // and the resources associated with event will be released automatically once the device has completed event.
                         // -> No need to synchronize here.
                         ALPAKA_HIP_RT_CHECK(hipEventDestroy(
-                            m_CudaEvent));
+                            m_HipEvent));
                     }
 
                 public:
-                    dev::DevCudaRt const m_dev;   //!< The device this event is bound to.
-                    hipEvent_t m_CudaEvent;
+                    dev::DevHipRt const m_dev;   //!< The device this event is bound to.
+                    hipEvent_t m_HipEvent;
                 };
             }
         }
 
         //#############################################################################
-        //! The CUDA RT device event.
+        //! The HIP RT device event.
         //#############################################################################
-        class EventCudaRt final
+        class EventHipRt final
         {
         public:
             //-----------------------------------------------------------------------------
             //! Constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST EventCudaRt(
-                dev::DevCudaRt const & dev,
+            ALPAKA_FN_HOST EventHipRt(
+                dev::DevHipRt const & dev,
                 bool bBusyWait = true) :
-                    m_spEventCudaImpl(std::make_shared<cuda::detail::EventCudaImpl>(dev, bBusyWait))
+                    m_spEventHipImpl(std::make_shared<hip::detail::EventHipImpl>(dev, bBusyWait))
             {
                 ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
             }
             //-----------------------------------------------------------------------------
             //! Copy constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST EventCudaRt(EventCudaRt const &) = default;
+            ALPAKA_FN_HOST EventHipRt(EventHipRt const &) = default;
             //-----------------------------------------------------------------------------
             //! Move constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST EventCudaRt(EventCudaRt &&) = default;
+            ALPAKA_FN_HOST EventHipRt(EventHipRt &&) = default;
             //-----------------------------------------------------------------------------
             //! Copy assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(EventCudaRt const &) -> EventCudaRt & = default;
+            ALPAKA_FN_HOST auto operator=(EventHipRt const &) -> EventHipRt & = default;
             //-----------------------------------------------------------------------------
             //! Move assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(EventCudaRt &&) -> EventCudaRt & = default;
+            ALPAKA_FN_HOST auto operator=(EventHipRt &&) -> EventHipRt & = default;
             //-----------------------------------------------------------------------------
             //! Equality comparison operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator==(EventCudaRt const & rhs) const
+            ALPAKA_FN_HOST auto operator==(EventHipRt const & rhs) const
             -> bool
             {
-                return (m_spEventCudaImpl->m_CudaEvent == rhs.m_spEventCudaImpl->m_CudaEvent);
+                return (m_spEventHipImpl->m_HipEvent == rhs.m_spEventHipImpl->m_HipEvent);
             }
             //-----------------------------------------------------------------------------
             //! Equality comparison operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator!=(EventCudaRt const & rhs) const
+            ALPAKA_FN_HOST auto operator!=(EventHipRt const & rhs) const
             -> bool
             {
                 return !((*this) == rhs);
@@ -171,10 +171,10 @@ namespace alpaka
             //-----------------------------------------------------------------------------
             //! Destructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST ~EventCudaRt() = default;
+            ALPAKA_FN_HOST ~EventHipRt() = default;
 
         public:
-            std::shared_ptr<cuda::detail::EventCudaImpl> m_spEventCudaImpl;
+            std::shared_ptr<hip::detail::EventHipImpl> m_spEventHipImpl;
         };
     }
 
@@ -183,20 +183,20 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT device event device get trait specialization.
+            //! The HIP RT device event device get trait specialization.
             //#############################################################################
             template<>
             struct GetDev<
-                event::EventCudaRt>
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto getDev(
-                    event::EventCudaRt const & event)
-                -> dev::DevCudaRt
+                    event::EventHipRt const & event)
+                -> dev::DevHipRt
                 {
-                    return event.m_spEventCudaImpl->m_dev;
+                    return event.m_spEventHipImpl->m_dev;
                 }
             };
         }
@@ -206,44 +206,44 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT device event event type trait specialization.
+            //! The HIP RT device event event type trait specialization.
             //#############################################################################
             template<>
             struct EventType<
-                event::EventCudaRt>
+                event::EventHipRt>
             {
-                using type = event::EventCudaRt;
+                using type = event::EventHipRt;
             };
             //#############################################################################
             //! The CPU device event create trait specialization.
             //#############################################################################
             template<>
             struct Create<
-                event::EventCudaRt,
-                dev::DevCudaRt>
+                event::EventHipRt,
+                dev::DevHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //!
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto create(
-                    dev::DevCudaRt const & dev)
-                -> event::EventCudaRt
+                    dev::DevHipRt const & dev)
+                -> event::EventHipRt
                 {
-                    return event::EventCudaRt(dev);
+                    return event::EventHipRt(dev);
                 }
             };
             //#############################################################################
-            //! The CUDA RT device event test trait specialization.
+            //! The HIP RT device event test trait specialization.
             //#############################################################################
             template<>
             struct Test<
-                event::EventCudaRt>
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto test(
-                    event::EventCudaRt const & event)
+                    event::EventHipRt const & event)
                 -> bool
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
@@ -252,7 +252,7 @@ namespace alpaka
                     hipError_t ret = hipSuccess;
                     ALPAKA_HIP_RT_CHECK_IGNORE(
                         ret = hipEventQuery(
-                            event.m_spEventCudaImpl->m_CudaEvent),
+                            event.m_spEventHipImpl->m_HipEvent),
                         hipErrorNotReady);
                     return (ret == hipSuccess);
                 }
@@ -264,49 +264,49 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT stream enqueue trait specialization.
+            //! The HIP RT stream enqueue trait specialization.
             //#############################################################################
             template<>
             struct Enqueue<
-                stream::StreamCudaRtAsync,
-                event::EventCudaRt>
+                stream::StreamHipRtAsync,
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtAsync & stream,
-                    event::EventCudaRt & event)
+                    stream::StreamHipRtAsync & stream,
+                    event::EventHipRt & event)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     ALPAKA_HIP_RT_CHECK(hipEventRecord(
-                        event.m_spEventCudaImpl->m_CudaEvent,
-                        stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
+                        event.m_spEventHipImpl->m_HipEvent,
+                        stream.m_spStreamHipRtAsyncImpl->m_HipStream));
                 }
             };
             //#############################################################################
-            //! The CUDA RT stream enqueue trait specialization.
+            //! The HIP RT stream enqueue trait specialization.
             //#############################################################################
             template<>
             struct Enqueue<
-                stream::StreamCudaRtSync,
-                event::EventCudaRt>
+                stream::StreamHipRtSync,
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtSync & stream,
-                    event::EventCudaRt & event)
+                    stream::StreamHipRtSync & stream,
+                    event::EventHipRt & event)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     ALPAKA_HIP_RT_CHECK(hipEventRecord(
-                        event.m_spEventCudaImpl->m_CudaEvent,
-                        stream.m_spStreamCudaRtSyncImpl->m_CudaStream));
+                        event.m_spEventHipImpl->m_HipEvent,
+                        stream.m_spStreamHipRtSyncImpl->m_HipStream));
                 }
             };
         }
@@ -316,93 +316,93 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT device event thread wait trait specialization.
+            //! The HIP RT device event thread wait trait specialization.
             //!
             //! Waits until the event itself and therefore all tasks preceding it in the stream it is enqueued to have been completed.
             //! If the event is not enqueued to a stream the method returns immediately.
             //#############################################################################
             template<>
             struct CurrentThreadWaitFor<
-                event::EventCudaRt>
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto currentThreadWaitFor(
-                    event::EventCudaRt const & event)
+                    event::EventHipRt const & event)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     // Sync is allowed even for events on non current device.
                     ALPAKA_HIP_RT_CHECK(hipEventSynchronize(
-                        event.m_spEventCudaImpl->m_CudaEvent));
+                        event.m_spEventHipImpl->m_HipEvent));
                 }
             };
             //#############################################################################
-            //! The CUDA RT stream event wait trait specialization.
+            //! The HIP RT stream event wait trait specialization.
             //#############################################################################
             template<>
             struct WaiterWaitFor<
-                stream::StreamCudaRtAsync,
-                event::EventCudaRt>
+                stream::StreamHipRtAsync,
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto waiterWaitFor(
-                    stream::StreamCudaRtAsync & stream,
-                    event::EventCudaRt const & event)
+                    stream::StreamHipRtAsync & stream,
+                    event::EventHipRt const & event)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     ALPAKA_HIP_RT_CHECK(hipStreamWaitEvent(
-                        stream.m_spStreamCudaRtAsyncImpl->m_CudaStream,
-                        event.m_spEventCudaImpl->m_CudaEvent,
+                        stream.m_spStreamHipRtAsyncImpl->m_HipStream,
+                        event.m_spEventHipImpl->m_HipEvent,
                         0));
                 }
             };
             //#############################################################################
-            //! The CUDA RT stream event wait trait specialization.
+            //! The HIP RT stream event wait trait specialization.
             //#############################################################################
             template<>
             struct WaiterWaitFor<
-                stream::StreamCudaRtSync,
-                event::EventCudaRt>
+                stream::StreamHipRtSync,
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto waiterWaitFor(
-                    stream::StreamCudaRtSync & stream,
-                    event::EventCudaRt const & event)
+                    stream::StreamHipRtSync & stream,
+                    event::EventHipRt const & event)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     ALPAKA_HIP_RT_CHECK(hipStreamWaitEvent(
-                        stream.m_spStreamCudaRtSyncImpl->m_CudaStream,
-                        event.m_spEventCudaImpl->m_CudaEvent,
+                        stream.m_spStreamHipRtSyncImpl->m_HipStream,
+                        event.m_spEventHipImpl->m_HipEvent,
                         0));
                 }
             };
             //#############################################################################
-            //! The CUDA RT device event wait trait specialization.
+            //! The HIP RT device event wait trait specialization.
             //!
             //! Any future work submitted in any stream of this device will wait for event to complete before beginning execution.
             //#############################################################################
             template<>
             struct WaiterWaitFor<
-                dev::DevCudaRt,
-                event::EventCudaRt>
+                dev::DevHipRt,
+                event::EventHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto waiterWaitFor(
-                    dev::DevCudaRt & dev,
-                    event::EventCudaRt const & event)
+                    dev::DevHipRt & dev,
+                    event::EventHipRt const & event)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
@@ -414,7 +414,7 @@ namespace alpaka
 
                     ALPAKA_HIP_RT_CHECK(hipStreamWaitEvent(
                         0,
-                        event.m_spEventCudaImpl->m_CudaEvent,
+                        event.m_spEventHipImpl->m_HipEvent,
                         0));
                 }
             };

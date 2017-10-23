@@ -23,7 +23,7 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, __HIPCC__
 
 // Specialized traits.
 #include <alpaka/acc/Traits.hpp>                // acc::traits::AccType
@@ -35,13 +35,13 @@
 #include <alpaka/stream/Traits.hpp>             // stream::traits::Enqueue
 
 // Implementation details.
-#include <alpaka/acc/AccGpuHipRt.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
+#include <alpaka/acc/AccGpuHipRt.hpp>		// as of now, just a renamed copy of it's HIP counterpart
 
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
 #include <alpaka/kernel/Traits.hpp>             // kernel::getBlockSharedMemDynSizeBytes
 
-#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
-#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
+#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's HIP counterpart)
+#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's HIP counterpart)
 
 #include <alpaka/workdiv/WorkDivMembers.hpp>    // workdiv::WorkDivMembers
 
@@ -51,7 +51,7 @@
     #include <alpaka/workdiv/WorkDivHelpers.hpp>// workdiv::isValidWorkDiv
 #endif
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
 
 #include <alpaka/meta/ApplyTuple.hpp>           // meta::apply
 #include <alpaka/meta/Metafunctions.hpp>        // meta::Conjunction
@@ -69,12 +69,12 @@ namespace alpaka
 {
     namespace exec
     {
-        namespace cuda
+        namespace hip
         {
             namespace detail
             {
                 //-----------------------------------------------------------------------------
-                //! The GPU CUDA kernel entry point.
+                //! The GPU HIP kernel entry point.
                 // \NOTE: 'A __global__ function or function template cannot have a trailing return type.'
                 //-----------------------------------------------------------------------------
                 template<
@@ -82,32 +82,32 @@ namespace alpaka
                     typename TSize,
                     typename TKernelFnObj,
                     typename... TArgs>
-                __global__ void cudaKernel(
+                __global__ void hipKernel(
                     vec::Vec<TDim, TSize> const threadElemExtent,
                     TKernelFnObj const kernelFnObj,
                     TArgs ... args)
                 {
-//#if BOOST_ARCH_CUDA_DEVICE && (BOOST_ARCH_CUDA_DEVICE < BOOST_VERSION_NUMBER(2, 0, 0))
-//    #error "Cuda device capability >= 2.0 is required!"
+//#if BOOST_ARCH_HIP_DEVICE && (BOOST_ARCH_HIP_DEVICE < BOOST_VERSION_NUMBER(2, 0, 0))
+//    #error "Hip device capability >= 2.0 is required!"
 //#endif
-                    acc::AccGpuCudaRt<TDim, TSize> acc(threadElemExtent);
+                    acc::AccGpuHipRt<TDim, TSize> acc(threadElemExtent);
 
                     kernelFnObj(
-                        const_cast<acc::AccGpuCudaRt<TDim, TSize> const &>(acc),
+                        const_cast<acc::AccGpuHipRt<TDim, TSize> const &>(acc),
                         args...);
                 }
             }
         }
 
         //#############################################################################
-        //! The GPU CUDA accelerator executor.
+        //! The GPU HIP accelerator executor.
         //#############################################################################
         template<
             typename TDim,
             typename TSize,
             typename TKernelFnObj,
             typename... TArgs>
-        class ExecGpuCudaRt final :
+        class ExecGpuHipRt final :
             public workdiv::WorkDivMembers<TDim, TSize>
         {
         public:
@@ -127,7 +127,7 @@ namespace alpaka
             //-----------------------------------------------------------------------------
             template<
                 typename TWorkDiv>
-            ALPAKA_FN_HOST ExecGpuCudaRt(
+            ALPAKA_FN_HOST ExecGpuHipRt(
                 TWorkDiv && workDiv,
                 TKernelFnObj const & kernelFnObj,
                 TArgs const & ... args) :
@@ -142,23 +142,23 @@ namespace alpaka
             //-----------------------------------------------------------------------------
             //! Copy constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST ExecGpuCudaRt(ExecGpuCudaRt const &) = default;
+            ALPAKA_FN_HOST ExecGpuHipRt(ExecGpuHipRt const &) = default;
             //-----------------------------------------------------------------------------
             //! Move constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST ExecGpuCudaRt(ExecGpuCudaRt &&) = default;
+            ALPAKA_FN_HOST ExecGpuHipRt(ExecGpuHipRt &&) = default;
             //-----------------------------------------------------------------------------
             //! Copy assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(ExecGpuCudaRt const &) -> ExecGpuCudaRt & = default;
+            ALPAKA_FN_HOST auto operator=(ExecGpuHipRt const &) -> ExecGpuHipRt & = default;
             //-----------------------------------------------------------------------------
             //! Move assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(ExecGpuCudaRt &&) -> ExecGpuCudaRt & = default;
+            ALPAKA_FN_HOST auto operator=(ExecGpuHipRt &&) -> ExecGpuHipRt & = default;
             //-----------------------------------------------------------------------------
             //! Destructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST ~ExecGpuCudaRt() = default;
+            ALPAKA_FN_HOST ~ExecGpuHipRt() = default;
 
             TKernelFnObj m_kernelFnObj;
             std::tuple<TArgs...> m_args;
@@ -170,7 +170,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA executor accelerator type trait specialization.
+            //! The GPU HIP executor accelerator type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -178,9 +178,9 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct AccType<
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>>
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>>
             {
-                using type = acc::AccGpuCudaRt<TDim, TSize>;
+                using type = acc::AccGpuHipRt<TDim, TSize>;
             };
         }
     }
@@ -189,7 +189,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA executor device type trait specialization.
+            //! The GPU HIP executor device type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -197,9 +197,9 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct DevType<
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>>
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>>
             {
-                using type = dev::DevCudaRt;
+                using type = dev::DevHipRt;
             };
         }
     }
@@ -208,7 +208,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA executor dimension getter trait specialization.
+            //! The GPU HIP executor dimension getter trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -216,7 +216,7 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct DimType<
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>>
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>>
             {
                 using type = TDim;
             };
@@ -227,7 +227,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA executor executor type trait specialization.
+            //! The GPU HIP executor executor type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -235,11 +235,11 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct ExecType<
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>,
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>,
                 TKernelFnObj,
                 TArgs...>
             {
-                using type = exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>;
+                using type = exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>;
             };
         }
     }
@@ -248,7 +248,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CPU CUDA executor platform type trait specialization.
+            //! The CPU HIP executor platform type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -256,9 +256,9 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct PltfType<
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>>
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>>
             {
-                using type = pltf::PltfCudaRt;
+                using type = pltf::PltfHipRt;
             };
         }
     }
@@ -267,7 +267,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA executor size type trait specialization.
+            //! The GPU HIP executor size type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -275,7 +275,7 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct SizeType<
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>>
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>>
             {
                 using type = TSize;
             };
@@ -286,7 +286,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA asynchronous kernel enqueue trait specialization.
+            //! The HIP asynchronous kernel enqueue trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -294,15 +294,15 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct Enqueue<
-                stream::StreamCudaRtAsync,
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>>
+                stream::StreamHipRtAsync,
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtAsync & stream,
-                    exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...> const & task)
+                    stream::StreamHipRtAsync & stream,
+                    exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...> const & task)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
@@ -310,10 +310,10 @@ namespace alpaka
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
                     //std::size_t printfFifoSize;
-                    //cudaDeviceGetLimit(&printfFifoSize, cudaLimitPrintfFifoSize);
+                    //hipDeviceGetLimit(&printfFifoSize, hipLimitPrintfFifoSize);
                     //std::cout << BOOST_CURRENT_FUNCTION << "INFO: printfFifoSize: " << printfFifoSize << std::endl;
-                    //cudaDeviceSetLimit(cudaLimitPrintfFifoSize, printfFifoSize*10);
-                    //cudaDeviceGetLimit(&printfFifoSize, cudaLimitPrintfFifoSize);
+                    //hipDeviceSetLimit(hipLimitPrintfFifoSize, printfFifoSize*10);
+                    //hipDeviceGetLimit(&printfFifoSize, hipLimitPrintfFifoSize);
                     //std::cout << BOOST_CURRENT_FUNCTION << "INFO: printfFifoSize: " <<  printfFifoSize << std::endl;
 #endif
                     auto const gridBlockExtent(
@@ -325,7 +325,7 @@ namespace alpaka
 
                     dim3 gridDim(1u, 1u, 1u);
                     dim3 blockDim(1u, 1u, 1u);
-                    // \FIXME: CUDA currently supports a maximum of 3 dimensions!
+                    // \FIXME: HIP currently supports a maximum of 3 dimensions!
                     for(auto i(static_cast<typename TDim::value_type>(0)); i<std::min(static_cast<typename TDim::value_type>(3), TDim::value); ++i)
                     {
                         reinterpret_cast<unsigned int *>(&gridDim)[i] = static_cast<unsigned int>(gridBlockExtent[TDim::value-1u-i]);
@@ -349,9 +349,9 @@ namespace alpaka
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_MINIMAL
                     // This checks for a valid work division that is also compliant with the maxima of the accelerator.
-                    if(!workdiv::isValidWorkDiv<acc::AccGpuCudaRt<TDim, TSize>>(dev::getDev(stream), task))
+                    if(!workdiv::isValidWorkDiv<acc::AccGpuHipRt<TDim, TSize>>(dev::getDev(stream), task))
                     {
-                        throw std::runtime_error("The given work division is not valid or not supported by the device of type " + acc::getAccName<acc::AccGpuCudaRt<TDim, TSize>>() + "!");
+                        throw std::runtime_error("The given work division is not valid or not supported by the device of type " + acc::getAccName<acc::AccGpuHipRt<TDim, TSize>>() + "!");
                     }
 #endif
 
@@ -362,7 +362,7 @@ namespace alpaka
                             {
                                 return
                                     kernel::getBlockSharedMemDynSizeBytes<
-                                        acc::AccGpuCudaRt<TDim, TSize>>(
+                                        acc::AccGpuHipRt<TDim, TSize>>(
                                             task.m_kernelFnObj,
                                             blockThreadExtent,
                                             threadElemExtent,
@@ -378,8 +378,8 @@ namespace alpaka
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
 /*                    // Log the function attributes.
-                    cudaFuncAttributes funcAttrs;
-                    cudaFuncGetAttributes(&funcAttrs, exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...>);
+                    hipFuncAttributes funcAttrs;
+                    hipFuncGetAttributes(&funcAttrs, exec::hip::detail::hipKernel<TDim, TSize, TKernelFnObj, TArgs...>);
                     std::cout << BOOST_CURRENT_FUNCTION
                         << " binaryVersion: " << funcAttrs.binaryVersion
                         << " constSizeBytes: " << funcAttrs.constSizeBytes << " B"
@@ -394,7 +394,7 @@ namespace alpaka
                     // Set the current device.
                     ALPAKA_HIP_RT_CHECK(
                         hipSetDevice(
-                            stream.m_spStreamCudaRtAsyncImpl->m_dev.m_iDevice));
+                            stream.m_spStreamHipRtAsyncImpl->m_dev.m_iDevice));
                     // Enqueue the kernel execution.
                     // \NOTE: No const reference (const &) is allowed as the parameter type because the kernel launch language extension expects the arguments by value.
                     // This forces the type of a float argument given with std::forward to this function to be of type float instead of e.g. "float const & __ptr64" (MSVC).
@@ -402,10 +402,10 @@ namespace alpaka
                     meta::apply(
                         [&](TArgs ... args)
                         {
-                        	hipLaunchKernel(HIP_KERNEL_NAME(exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...>),
+                        	hipLaunchKernel(HIP_KERNEL_NAME(exec::hip::detail::hipKernel<TDim, TSize, TKernelFnObj, TArgs...>),
                         	dim3(gridDim), dim3(blockDim),
                            	static_cast<std::size_t>(blockSharedMemDynSizeBytes),
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream,
+                                stream.m_spStreamHipRtAsyncImpl->m_HipStream,
                                     threadElemExtent,
                                     task.m_kernelFnObj,
                                     args...);
@@ -416,14 +416,14 @@ namespace alpaka
                     // Wait for the kernel execution to finish but do not check error return of this call.
                     // Do not use the alpaka::wait method because it checks the error itself but we want to give a custom error message.
                     hipStreamSynchronize(
-                        stream.m_spStreamCudaRtAsyncImpl->m_CudaStream);
+                        stream.m_spStreamHipRtAsyncImpl->m_HipStream);
                     std::string const kernelName("'execution of kernel: '" + std::string(typeid(TKernelFnObj).name()) + "' failed with");
-                    ::alpaka::cuda::detail::hipRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
+                    ::alpaka::hip::detail::hipRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
 #endif
                 }
             };
             //#############################################################################
-            //! The CUDA synchronous kernel enqueue trait specialization.
+            //! The HIP synchronous kernel enqueue trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -431,15 +431,15 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct Enqueue<
-                stream::StreamCudaRtSync,
-                exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>>
+                stream::StreamHipRtSync,
+                exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtSync & stream,
-                    exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...> const & task)
+                    stream::StreamHipRtSync & stream,
+                    exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...> const & task)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
@@ -447,10 +447,10 @@ namespace alpaka
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
                     //std::size_t printfFifoSize;
-                    //cudaDeviceGetLimit(&printfFifoSize, cudaLimitPrintfFifoSize);
+                    //hipDeviceGetLimit(&printfFifoSize, hipLimitPrintfFifoSize);
                     //std::cout << BOOST_CURRENT_FUNCTION << "INFO: printfFifoSize: " << printfFifoSize << std::endl;
-                    //cudaDeviceSetLimit(cudaLimitPrintfFifoSize, printfFifoSize*10);
-                    //cudaDeviceGetLimit(&printfFifoSize, cudaLimitPrintfFifoSize);
+                    //hipDeviceSetLimit(hipLimitPrintfFifoSize, printfFifoSize*10);
+                    //hipDeviceGetLimit(&printfFifoSize, hipLimitPrintfFifoSize);
                     //std::cout << BOOST_CURRENT_FUNCTION << "INFO: printfFifoSize: " <<  printfFifoSize << std::endl;
 #endif
                     auto const gridBlockExtent(
@@ -462,7 +462,7 @@ namespace alpaka
 
                     dim3 gridDim(1u, 1u, 1u);
                     dim3 blockDim(1u, 1u, 1u);
-                    // \FIXME: CUDA currently supports a maximum of 3 dimensions!
+                    // \FIXME: HIP currently supports a maximum of 3 dimensions!
                     for(auto i(static_cast<typename TDim::value_type>(0)); i<std::min(static_cast<typename TDim::value_type>(3), TDim::value); ++i)
                     {
                         reinterpret_cast<unsigned int *>(&gridDim)[i] = static_cast<unsigned int>(gridBlockExtent[TDim::value-1u-i]);
@@ -483,9 +483,9 @@ namespace alpaka
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_MINIMAL
                     // This checks for a valid work division that is also compliant with the maxima of the accelerator.
-                    if(!workdiv::isValidWorkDiv<acc::AccGpuCudaRt<TDim, TSize>>(dev::getDev(stream), task))
+                    if(!workdiv::isValidWorkDiv<acc::AccGpuHipRt<TDim, TSize>>(dev::getDev(stream), task))
                     {
-                        throw std::runtime_error("The given work division is not valid or not supported by the device of type " + acc::getAccName<acc::AccGpuCudaRt<TDim, TSize>>() + "!");
+                        throw std::runtime_error("The given work division is not valid or not supported by the device of type " + acc::getAccName<acc::AccGpuHipRt<TDim, TSize>>() + "!");
                     }
 #endif
 
@@ -496,7 +496,7 @@ namespace alpaka
                             {
                                 return
                                     kernel::getBlockSharedMemDynSizeBytes<
-                                        acc::AccGpuCudaRt<TDim, TSize>>(
+                                        acc::AccGpuHipRt<TDim, TSize>>(
                                             task.m_kernelFnObj,
                                             blockThreadExtent,
                                             threadElemExtent,
@@ -511,10 +511,10 @@ namespace alpaka
 #endif
 
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
-// cudaFuncAttributes not ported from CUDA to HIP.
+// hipFuncAttributes not ported from HIP to HIP.
                     // Log the function attributes.
-/*                    cudaFuncAttributes funcAttrs;
-                    cudaFuncGetAttributes(&funcAttrs, exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...>);
+/*                    hipFuncAttributes funcAttrs;
+                    hipFuncGetAttributes(&funcAttrs, exec::hip::detail::hipKernel<TDim, TSize, TKernelFnObj, TArgs...>);
                     std::cout << BOOST_CURRENT_FUNCTION
                         << " binaryVersion: " << funcAttrs.binaryVersion
                         << " constSizeBytes: " << funcAttrs.constSizeBytes << " B"
@@ -529,7 +529,7 @@ namespace alpaka
                     // Set the current device.
                     ALPAKA_HIP_RT_CHECK(
                         hipSetDevice(
-                            stream.m_spStreamCudaRtSyncImpl->m_dev.m_iDevice));
+                            stream.m_spStreamHipRtSyncImpl->m_dev.m_iDevice));
                     // Enqueue the kernel execution.
                     // \NOTE: No const reference (const &) is allowed as the parameter type because the kernel launch language extension expects the arguments by value.
                     // This forces the type of a float argument given with std::forward to this function to be of type float instead of e.g. "float const & __ptr64" (MSVC).
@@ -537,11 +537,11 @@ namespace alpaka
                     meta::apply(
                         [&](TArgs ... args)
                         {
-                            exec::cuda::detail::cudaKernel<TDim, TSize, TKernelFnObj, TArgs...><<<
+                            exec::hip::detail::hipKernel<TDim, TSize, TKernelFnObj, TArgs...><<<
                                 gridDim,
                                 blockDim,
                                 blockSharedMemDynSizeBytes,
-                                stream.m_spStreamCudaRtSyncImpl->m_CudaStream>>>(
+                                stream.m_spStreamHipRtSyncImpl->m_HipStream>>>(
                                     threadElemExtent,
                                     task.m_kernelFnObj,
                                     args...);
@@ -551,10 +551,10 @@ namespace alpaka
                     // Wait for the kernel execution to finish but do not check error return of this call.
                     // Do not use the alpaka::wait method because it checks the error itself but we want to give a custom error message.
                     hipStreamSynchronize(
-                        stream.m_spStreamCudaRtSyncImpl->m_CudaStream);
+                        stream.m_spStreamHipRtSyncImpl->m_HipStream);
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_MINIMAL
                     std::string const kernelName("'execution of kernel: '" + std::string(typeid(TKernelFnObj).name()) + "' failed with");
-                    ::alpaka::cuda::detail::hipRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
+                    ::alpaka::hip::detail::hipRtCheckLastError(kernelName.c_str(), __FILE__, __LINE__);
 #endif
                 }
             };

@@ -23,7 +23,7 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
 #include <alpaka/time/Traits.hpp>       // time::Clock
 
@@ -32,56 +32,56 @@ namespace alpaka
     namespace time
     {
         //#############################################################################
-        //! The GPU CUDA accelerator time implementation.
+        //! The GPU HIP accelerator time implementation.
         //#############################################################################
-        class TimeCudaBuiltIn
+        class TimeHipBuiltIn
         {
         public:
-            using TimeBase = TimeCudaBuiltIn;
+            using TimeBase = TimeHipBuiltIn;
 
             //-----------------------------------------------------------------------------
             //! Default constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY TimeCudaBuiltIn() = default;
+            ALPAKA_FN_ACC_HIP_ONLY TimeHipBuiltIn() = default;
             //-----------------------------------------------------------------------------
             //! Copy constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY TimeCudaBuiltIn(TimeCudaBuiltIn const &) = delete;
+            ALPAKA_FN_ACC_HIP_ONLY TimeHipBuiltIn(TimeHipBuiltIn const &) = delete;
             //-----------------------------------------------------------------------------
             //! Move constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY TimeCudaBuiltIn(TimeCudaBuiltIn &&) = delete;
+            ALPAKA_FN_ACC_HIP_ONLY TimeHipBuiltIn(TimeHipBuiltIn &&) = delete;
             //-----------------------------------------------------------------------------
             //! Copy assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY auto operator=(TimeCudaBuiltIn const &) -> TimeCudaBuiltIn & = delete;
+            ALPAKA_FN_ACC_HIP_ONLY auto operator=(TimeHipBuiltIn const &) -> TimeHipBuiltIn & = delete;
             //-----------------------------------------------------------------------------
             //! Move assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY auto operator=(TimeCudaBuiltIn &&) -> TimeCudaBuiltIn & = delete;
+            ALPAKA_FN_ACC_HIP_ONLY auto operator=(TimeHipBuiltIn &&) -> TimeHipBuiltIn & = delete;
             //-----------------------------------------------------------------------------
             //! Destructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY /*virtual*/ ~TimeCudaBuiltIn() = default;
+            ALPAKA_FN_ACC_HIP_ONLY /*virtual*/ ~TimeHipBuiltIn() = default;
         };
 
         namespace traits
         {
             //#############################################################################
-            //! The CUDA built-in clock operation.
+            //! The HIP built-in clock operation.
             //#############################################################################
             template<>
             struct Clock<
-                time::TimeCudaBuiltIn>
+                time::TimeHipBuiltIn>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY static auto clock(
-                    time::TimeCudaBuiltIn const &)
+                ALPAKA_FN_ACC_HIP_ONLY static auto clock(
+                    time::TimeHipBuiltIn const &)
                 -> std::uint64_t
                 {
-                    // This can be converted to a wall-clock time in seconds by dividing through the shader clock rate given by cudaDeviceProp::clockRate.
+                    // This can be converted to a wall-clock time in seconds by dividing through the shader clock rate given by hipDeviceProp::clockRate.
                     // This clock rate is double the main clock rate on Fermi and older cards. 
                     return
                         static_cast<std::uint64_t>(

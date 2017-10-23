@@ -23,10 +23,10 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
+#if !defined(__HIPCC__)
+    #error If ALPAKA_ACC_GPU_HIP_ENABLED is set, the compiler has to support HIP!
 #endif
 
 #include <alpaka/math/asin/Traits.hpp>  // Asin
@@ -43,10 +43,10 @@ namespace alpaka
         //#############################################################################
         //! The standard library asin.
         //#############################################################################
-        class AsinCudaBuiltIn
+        class AsinHipBuiltIn
         {
         public:
-            using AsinBase = AsinCudaBuiltIn;
+            using AsinBase = AsinHipBuiltIn;
         };
 
         namespace traits
@@ -57,13 +57,13 @@ namespace alpaka
             template<
                 typename TArg>
             struct Asin<
-                AsinCudaBuiltIn,
+                AsinHipBuiltIn,
                 TArg,
                 typename std::enable_if<
                     std::is_floating_point<TArg>::value>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto asin(
-                    AsinCudaBuiltIn const & /*asin*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto asin(
+                    AsinHipBuiltIn const & /*asin*/,
                     TArg const & arg)
                 -> decltype(::asin(arg))
                 {

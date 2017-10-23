@@ -23,7 +23,7 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>           // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>           // ALPAKA_FN_*, __HIPCC__
 
 #include <alpaka/block/shared/st/Traits.hpp>// AllocVar
 
@@ -39,37 +39,37 @@ namespace alpaka
             namespace st
             {
                 //#############################################################################
-                //! The GPU CUDA block shared memory allocator.
+                //! The GPU HIP block shared memory allocator.
                 //#############################################################################
-                class BlockSharedMemStCudaBuiltIn
+                class BlockSharedMemStHipBuiltIn
                 {
                 public:
-                    using BlockSharedMemStBase = BlockSharedMemStCudaBuiltIn;
+                    using BlockSharedMemStBase = BlockSharedMemStHipBuiltIn;
 
                     //-----------------------------------------------------------------------------
                     //! Default constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY BlockSharedMemStCudaBuiltIn() = default;
+                    ALPAKA_FN_ACC_HIP_ONLY BlockSharedMemStHipBuiltIn() = default;
                     //-----------------------------------------------------------------------------
                     //! Copy constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY BlockSharedMemStCudaBuiltIn(BlockSharedMemStCudaBuiltIn const &) = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY BlockSharedMemStHipBuiltIn(BlockSharedMemStHipBuiltIn const &) = delete;
                     //-----------------------------------------------------------------------------
                     //! Move constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY BlockSharedMemStCudaBuiltIn(BlockSharedMemStCudaBuiltIn &&) = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY BlockSharedMemStHipBuiltIn(BlockSharedMemStHipBuiltIn &&) = delete;
                     //-----------------------------------------------------------------------------
                     //! Copy assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY auto operator=(BlockSharedMemStCudaBuiltIn const &) -> BlockSharedMemStCudaBuiltIn & = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY auto operator=(BlockSharedMemStHipBuiltIn const &) -> BlockSharedMemStHipBuiltIn & = delete;
                     //-----------------------------------------------------------------------------
                     //! Move assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY auto operator=(BlockSharedMemStCudaBuiltIn &&) -> BlockSharedMemStCudaBuiltIn & = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY auto operator=(BlockSharedMemStHipBuiltIn &&) -> BlockSharedMemStHipBuiltIn & = delete;
                     //-----------------------------------------------------------------------------
                     //! Destructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY /*virtual*/ ~BlockSharedMemStCudaBuiltIn() = default;
+                    ALPAKA_FN_ACC_HIP_ONLY /*virtual*/ ~BlockSharedMemStHipBuiltIn() = default;
                 };
 
                 namespace traits
@@ -83,13 +83,13 @@ namespace alpaka
                     struct AllocVar<
                         T,
                         TuniqueId,
-                        BlockSharedMemStCudaBuiltIn>
+                        BlockSharedMemStHipBuiltIn>
                     {
                         //-----------------------------------------------------------------------------
                         //
                         //-----------------------------------------------------------------------------
-                        ALPAKA_FN_ACC_CUDA_ONLY static auto allocVar(
-                            block::shared::st::BlockSharedMemStCudaBuiltIn const &)
+                        ALPAKA_FN_ACC_HIP_ONLY static auto allocVar(
+                            block::shared::st::BlockSharedMemStHipBuiltIn const &)
                         -> T &
                         {
                             __shared__ uint8_t shMem alignas(alignof(T)) [sizeof(T)];
@@ -102,16 +102,16 @@ namespace alpaka
                     //#############################################################################
                     template<>
                     struct FreeMem<
-                        BlockSharedMemStCudaBuiltIn>
+                        BlockSharedMemStHipBuiltIn>
                     {
                         //-----------------------------------------------------------------------------
                         //
                         //-----------------------------------------------------------------------------
-                        ALPAKA_FN_ACC_CUDA_ONLY static auto freeMem(
-                            block::shared::st::BlockSharedMemStCudaBuiltIn const &)
+                        ALPAKA_FN_ACC_HIP_ONLY static auto freeMem(
+                            block::shared::st::BlockSharedMemStHipBuiltIn const &)
                         -> void
                         {
-                            // Nothing to do. CUDA block shared memory is automatically freed when all threads left the block.
+                            // Nothing to do. HIP block shared memory is automatically freed when all threads left the block.
                         }
                     };
                 }

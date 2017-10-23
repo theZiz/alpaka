@@ -23,7 +23,7 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
 
 #include <alpaka/block/sync/Traits.hpp> // SyncBlockThreads
@@ -35,37 +35,37 @@ namespace alpaka
         namespace sync
         {
             //#############################################################################
-            //! The GPU CUDA block synchronization.
+            //! The GPU HIP block synchronization.
             //#############################################################################
-            class BlockSyncCudaBuiltIn
+            class BlockSyncHipBuiltIn
             {
             public:
-                using BlockSyncBase = BlockSyncCudaBuiltIn;
+                using BlockSyncBase = BlockSyncHipBuiltIn;
 
                 //-----------------------------------------------------------------------------
                 //! Default constructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY BlockSyncCudaBuiltIn() = default;
+                ALPAKA_FN_ACC_HIP_ONLY BlockSyncHipBuiltIn() = default;
                 //-----------------------------------------------------------------------------
                 //! Copy constructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY BlockSyncCudaBuiltIn(BlockSyncCudaBuiltIn const &) = delete;
+                ALPAKA_FN_ACC_HIP_ONLY BlockSyncHipBuiltIn(BlockSyncHipBuiltIn const &) = delete;
                 //-----------------------------------------------------------------------------
                 //! Move constructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY BlockSyncCudaBuiltIn(BlockSyncCudaBuiltIn &&) = delete;
+                ALPAKA_FN_ACC_HIP_ONLY BlockSyncHipBuiltIn(BlockSyncHipBuiltIn &&) = delete;
                 //-----------------------------------------------------------------------------
                 //! Copy assignment operator.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY auto operator=(BlockSyncCudaBuiltIn const &) -> BlockSyncCudaBuiltIn & = delete;
+                ALPAKA_FN_ACC_HIP_ONLY auto operator=(BlockSyncHipBuiltIn const &) -> BlockSyncHipBuiltIn & = delete;
                 //-----------------------------------------------------------------------------
                 //! Move assignment operator.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY auto operator=(BlockSyncCudaBuiltIn &&) -> BlockSyncCudaBuiltIn & = delete;
+                ALPAKA_FN_ACC_HIP_ONLY auto operator=(BlockSyncHipBuiltIn &&) -> BlockSyncHipBuiltIn & = delete;
                 //-----------------------------------------------------------------------------
                 //! Destructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY /*virtual*/ ~BlockSyncCudaBuiltIn() = default;
+                ALPAKA_FN_ACC_HIP_ONLY /*virtual*/ ~BlockSyncHipBuiltIn() = default;
             };
 
             namespace traits
@@ -75,13 +75,13 @@ namespace alpaka
                 //#############################################################################
                 template<>
                 struct SyncBlockThreads<
-                    BlockSyncCudaBuiltIn>
+                    BlockSyncHipBuiltIn>
                 {
                     //-----------------------------------------------------------------------------
                     //
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY static auto syncBlockThreads(
-                        block::sync::BlockSyncCudaBuiltIn const & /*blockSync*/)
+                    ALPAKA_FN_ACC_HIP_ONLY static auto syncBlockThreads(
+                        block::sync::BlockSyncHipBuiltIn const & /*blockSync*/)
                     -> void
                     {
                         __syncthreads();
@@ -94,13 +94,13 @@ namespace alpaka
                 template<>
                 struct SyncBlockThreadsPredicate<
                     block::sync::op::Count,
-                    BlockSyncCudaBuiltIn>
+                    BlockSyncHipBuiltIn>
                 {
                     //-----------------------------------------------------------------------------
                     //
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY static auto syncBlockThreadsPredicate(
-                        block::sync::BlockSyncCudaBuiltIn const & /*blockSync*/,
+                    ALPAKA_FN_ACC_HIP_ONLY static auto syncBlockThreadsPredicate(
+                        block::sync::BlockSyncHipBuiltIn const & /*blockSync*/,
                         int predicate)
                     -> int
                     {
@@ -114,13 +114,13 @@ namespace alpaka
                 template<>
                 struct SyncBlockThreadsPredicate<
                     block::sync::op::LogicalAnd,
-                    BlockSyncCudaBuiltIn>
+                    BlockSyncHipBuiltIn>
                 {
                     //-----------------------------------------------------------------------------
                     //
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY static auto syncBlockThreadsPredicate(
-                        block::sync::BlockSyncCudaBuiltIn const & /*blockSync*/,
+                    ALPAKA_FN_ACC_HIP_ONLY static auto syncBlockThreadsPredicate(
+                        block::sync::BlockSyncHipBuiltIn const & /*blockSync*/,
                         int predicate)
                     -> int
                     {
@@ -134,13 +134,13 @@ namespace alpaka
                 template<>
                 struct SyncBlockThreadsPredicate<
                     block::sync::op::LogicalOr,
-                    BlockSyncCudaBuiltIn>
+                    BlockSyncHipBuiltIn>
                 {
                     //-----------------------------------------------------------------------------
                     //
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY static auto syncBlockThreadsPredicate(
-                        block::sync::BlockSyncCudaBuiltIn const & /*blockSync*/,
+                    ALPAKA_FN_ACC_HIP_ONLY static auto syncBlockThreadsPredicate(
+                        block::sync::BlockSyncHipBuiltIn const & /*blockSync*/,
                         int predicate)
                     -> int
                     {

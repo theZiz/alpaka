@@ -23,16 +23,16 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
 
 #include <alpaka/dev/Traits.hpp>        // dev::GetDev, dev::DevType
 #include <alpaka/event/Traits.hpp>      // event::EventType
 #include <alpaka/stream/Traits.hpp>     // stream::traits::Enqueue, ...
 #include <alpaka/wait/Traits.hpp>       // CurrentThreadWaitFor, WaiterWaitFor
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
 
 #include <stdexcept>                    // std::runtime_error
 #include <memory>                       // std::shared_ptr
@@ -42,7 +42,7 @@ namespace alpaka
 {
     namespace event
     {
-        class EventCudaRt;
+        class EventHipRt;
     }
 }
 
@@ -50,23 +50,23 @@ namespace alpaka
 {
     namespace stream
     {
-        namespace cuda
+        namespace hip
         {
             namespace detail
             {
                 //#############################################################################
-                //! The CUDA RT stream implementation.
+                //! The HIP RT stream implementation.
                 //#############################################################################
-                class StreamCudaRtSyncImpl final
+                class StreamHipRtSyncImpl final
                 {
                 public:
                     //-----------------------------------------------------------------------------
                     //! Constructor.
                     //-----------------------------------------------------------------------------
-                    StreamCudaRtSyncImpl(
-                        dev::DevCudaRt const & dev) :
+                    StreamHipRtSyncImpl(
+                        dev::DevHipRt const & dev) :
                             m_dev(dev),
-                            m_CudaStream()
+                            m_HipStream()
                     {
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
@@ -74,100 +74,100 @@ namespace alpaka
                         ALPAKA_HIP_RT_CHECK(
                             hipSetDevice(
                                 m_dev.m_iDevice));
-                        // - cudaStreamDefault: Default stream creation flag.
-                        // - cudaStreamNonBlocking: Specifies that work running in the created stream may run concurrently with work in stream 0 (the NULL stream),
+                        // - hipStreamDefault: Default stream creation flag.
+                        // - hipStreamNonBlocking: Specifies that work running in the created stream may run concurrently with work in stream 0 (the NULL stream),
                         //   and that the created stream should perform no implicit synchronization with stream 0.
                         // Create the stream on the current device.
-                        // NOTE: cudaStreamNonBlocking is required to match the semantic implemented in the alpaka CPU stream.
+                        // NOTE: hipStreamNonBlocking is required to match the semantic implemented in the alpaka CPU stream.
                         // It would be too much work to implement implicit default stream synchronization on CPU.
                         ALPAKA_HIP_RT_CHECK(
                             hipStreamCreateWithFlags(
-                                &m_CudaStream,
+                                &m_HipStream,
                                 hipStreamNonBlocking));
                     }
                     //-----------------------------------------------------------------------------
                     //! Copy constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST StreamCudaRtSyncImpl(StreamCudaRtSyncImpl const &) = delete;
+                    ALPAKA_FN_HOST StreamHipRtSyncImpl(StreamHipRtSyncImpl const &) = delete;
                     //-----------------------------------------------------------------------------
                     //! Move constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST StreamCudaRtSyncImpl(StreamCudaRtSyncImpl &&) = default;
+                    ALPAKA_FN_HOST StreamHipRtSyncImpl(StreamHipRtSyncImpl &&) = default;
                     //-----------------------------------------------------------------------------
                     //! Copy assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST auto operator=(StreamCudaRtSyncImpl const &) -> StreamCudaRtSyncImpl & = delete;
+                    ALPAKA_FN_HOST auto operator=(StreamHipRtSyncImpl const &) -> StreamHipRtSyncImpl & = delete;
                     //-----------------------------------------------------------------------------
                     //! Move assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_HOST auto operator=(StreamCudaRtSyncImpl &&) -> StreamCudaRtSyncImpl & = default;
+                    ALPAKA_FN_HOST auto operator=(StreamHipRtSyncImpl &&) -> StreamHipRtSyncImpl & = default;
                     //-----------------------------------------------------------------------------
                     //! Destructor.
                     //-----------------------------------------------------------------------------
-                    ~StreamCudaRtSyncImpl()
+                    ~StreamHipRtSyncImpl()
                     {
                         ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
-                        // Set the current device. \TODO: Is setting the current device before cudaStreamDestroy required?
+                        // Set the current device. \TODO: Is setting the current device before hipStreamDestroy required?
                         ALPAKA_HIP_RT_CHECK(
                             hipSetDevice(
                                 m_dev.m_iDevice));
-                        // In case the device is still doing work in the stream when cudaStreamDestroy() is called, the function will return immediately
+                        // In case the device is still doing work in the stream when hipStreamDestroy() is called, the function will return immediately
                         // and the resources associated with stream will be released automatically once the device has completed all work in stream.
                         // -> No need to synchronize here.
                         ALPAKA_HIP_RT_CHECK(
                             hipStreamDestroy(
-                                m_CudaStream));
+                                m_HipStream));
                     }
 
                 public:
-                    dev::DevCudaRt const m_dev;   //!< The device this stream is bound to.
-                    hipStream_t m_CudaStream;
+                    dev::DevHipRt const m_dev;   //!< The device this stream is bound to.
+                    hipStream_t m_HipStream;
                 };
             }
         }
 
         //#############################################################################
-        //! The CUDA RT stream.
+        //! The HIP RT stream.
         //#############################################################################
-        class StreamCudaRtSync final
+        class StreamHipRtSync final
         {
         public:
             //-----------------------------------------------------------------------------
             //! Constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST StreamCudaRtSync(
-                dev::DevCudaRt const & dev) :
-                m_spStreamCudaRtSyncImpl(std::make_shared<cuda::detail::StreamCudaRtSyncImpl>(dev))
+            ALPAKA_FN_HOST StreamHipRtSync(
+                dev::DevHipRt const & dev) :
+                m_spStreamHipRtSyncImpl(std::make_shared<hip::detail::StreamHipRtSyncImpl>(dev))
             {}
             //-----------------------------------------------------------------------------
             //! Copy constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST StreamCudaRtSync(StreamCudaRtSync const &) = default;
+            ALPAKA_FN_HOST StreamHipRtSync(StreamHipRtSync const &) = default;
             //-----------------------------------------------------------------------------
             //! Move constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST StreamCudaRtSync(StreamCudaRtSync &&) = default;
+            ALPAKA_FN_HOST StreamHipRtSync(StreamHipRtSync &&) = default;
             //-----------------------------------------------------------------------------
             //! Copy assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(StreamCudaRtSync const &) -> StreamCudaRtSync & = default;
+            ALPAKA_FN_HOST auto operator=(StreamHipRtSync const &) -> StreamHipRtSync & = default;
             //-----------------------------------------------------------------------------
             //! Move assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(StreamCudaRtSync &&) -> StreamCudaRtSync & = default;
+            ALPAKA_FN_HOST auto operator=(StreamHipRtSync &&) -> StreamHipRtSync & = default;
             //-----------------------------------------------------------------------------
             //! Equality comparison operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator==(StreamCudaRtSync const & rhs) const
+            ALPAKA_FN_HOST auto operator==(StreamHipRtSync const & rhs) const
             -> bool
             {
-                return (m_spStreamCudaRtSyncImpl->m_CudaStream == rhs.m_spStreamCudaRtSyncImpl->m_CudaStream);
+                return (m_spStreamHipRtSyncImpl->m_HipStream == rhs.m_spStreamHipRtSyncImpl->m_HipStream);
             }
             //-----------------------------------------------------------------------------
             //! Equality comparison operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator!=(StreamCudaRtSync const & rhs) const
+            ALPAKA_FN_HOST auto operator!=(StreamHipRtSync const & rhs) const
             -> bool
             {
                 return !((*this) == rhs);
@@ -175,10 +175,10 @@ namespace alpaka
             //-----------------------------------------------------------------------------
             //! Destructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST ~StreamCudaRtSync() = default;
+            ALPAKA_FN_HOST ~StreamHipRtSync() = default;
 
         public:
-            std::shared_ptr<cuda::detail::StreamCudaRtSyncImpl> m_spStreamCudaRtSyncImpl;
+            std::shared_ptr<hip::detail::StreamHipRtSyncImpl> m_spStreamHipRtSyncImpl;
         };
     }
 
@@ -187,29 +187,29 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT stream device type trait specialization.
+            //! The HIP RT stream device type trait specialization.
             //#############################################################################
             template<>
             struct DevType<
-                stream::StreamCudaRtSync>
+                stream::StreamHipRtSync>
             {
-                using type = dev::DevCudaRt;
+                using type = dev::DevHipRt;
             };
             //#############################################################################
-            //! The CUDA RT stream device get trait specialization.
+            //! The HIP RT stream device get trait specialization.
             //#############################################################################
             template<>
             struct GetDev<
-                stream::StreamCudaRtSync>
+                stream::StreamHipRtSync>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto getDev(
-                    stream::StreamCudaRtSync const & stream)
-                -> dev::DevCudaRt
+                    stream::StreamHipRtSync const & stream)
+                -> dev::DevHipRt
                 {
-                    return stream.m_spStreamCudaRtSyncImpl->m_dev;
+                    return stream.m_spStreamHipRtSyncImpl->m_dev;
                 }
             };
         }
@@ -219,13 +219,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT stream event type trait specialization.
+            //! The HIP RT stream event type trait specialization.
             //#############################################################################
             template<>
             struct EventType<
-                stream::StreamCudaRtSync>
+                stream::StreamHipRtSync>
             {
-                using type = event::EventCudaRt;
+                using type = event::EventHipRt;
             };
         }
     }
@@ -234,17 +234,17 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT stream test trait specialization.
+            //! The HIP RT stream test trait specialization.
             //#############################################################################
             template<>
             struct Empty<
-                stream::StreamCudaRtSync>
+                stream::StreamHipRtSync>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto empty(
-                    stream::StreamCudaRtSync const & stream)
+                    stream::StreamHipRtSync const & stream)
                 -> bool
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
@@ -253,7 +253,7 @@ namespace alpaka
                     hipError_t ret = hipSuccess;
                     ALPAKA_HIP_RT_CHECK_IGNORE(
                         ret = hipStreamQuery(
-                            stream.m_spStreamCudaRtSyncImpl->m_CudaStream),
+                            stream.m_spStreamHipRtSyncImpl->m_HipStream),
                         hipErrorNotReady);
                     return (ret == hipSuccess);
                 }
@@ -265,26 +265,26 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT stream thread wait trait specialization.
+            //! The HIP RT stream thread wait trait specialization.
             //!
             //! Blocks execution of the calling thread until the stream has finished processing all previously requested tasks (kernels, data copies, ...)
             //#############################################################################
             template<>
             struct CurrentThreadWaitFor<
-                stream::StreamCudaRtSync>
+                stream::StreamHipRtSync>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto currentThreadWaitFor(
-                    stream::StreamCudaRtSync const & stream)
+                    stream::StreamHipRtSync const & stream)
                 -> void
                 {
                     ALPAKA_DEBUG_MINIMAL_LOG_SCOPE;
 
                     // Sync is allowed even for streams on non current device.
                     ALPAKA_HIP_RT_CHECK(hipStreamSynchronize(
-                        stream.m_spStreamCudaRtSyncImpl->m_CudaStream));
+                        stream.m_spStreamHipRtSyncImpl->m_HipStream));
                 }
             };
         }

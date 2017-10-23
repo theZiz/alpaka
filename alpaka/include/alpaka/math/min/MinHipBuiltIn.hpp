@@ -23,10 +23,10 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
+#if !defined(__HIPCC__)
+    #error If ALPAKA_ACC_GPU_HIP_ENABLED is set, the compiler has to support HIP!
 #endif
 
 #include <alpaka/math/min/Traits.hpp>   // Min
@@ -44,10 +44,10 @@ namespace alpaka
         //#############################################################################
         //! The standard library min.
         //#############################################################################
-        class MinCudaBuiltIn
+        class MinHipBuiltIn
         {
         public:
-            using MinBase = MinCudaBuiltIn;
+            using MinBase = MinHipBuiltIn;
         };
 
         namespace traits
@@ -59,15 +59,15 @@ namespace alpaka
                 typename Tx,
                 typename Ty>
             struct Min<
-                MinCudaBuiltIn,
+                MinHipBuiltIn,
                 Tx,
                 Ty,
                 typename std::enable_if<
                     std::is_integral<Tx>::value
                     && std::is_integral<Ty>::value>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto min(
-                    MinCudaBuiltIn const & /*min*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto min(
+                    MinHipBuiltIn const & /*min*/,
                     Tx const & x,
                     Ty const & y)
                 -> decltype(::min(x, y))
@@ -83,7 +83,7 @@ namespace alpaka
                 typename Tx,
                 typename Ty>
             struct Min<
-                MinCudaBuiltIn,
+                MinHipBuiltIn,
                 Tx,
                 Ty,
                 typename std::enable_if<
@@ -92,8 +92,8 @@ namespace alpaka
                     && !(std::is_integral<Tx>::value
                         && std::is_integral<Ty>::value)>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto max(
-                    MinCudaBuiltIn const & /*min*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto max(
+                    MinHipBuiltIn const & /*min*/,
                     Tx const & x,
                     Ty const & y)
                 -> decltype(::fmin(x, y))

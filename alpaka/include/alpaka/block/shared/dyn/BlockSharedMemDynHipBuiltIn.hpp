@@ -23,7 +23,7 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, __HIPCC__
 
 #include <alpaka/block/shared/dyn/Traits.hpp>   // AllocVar
 
@@ -38,37 +38,37 @@ namespace alpaka
             namespace dyn
             {
                 //#############################################################################
-                //! The GPU CUDA block shared memory allocator.
+                //! The GPU HIP block shared memory allocator.
                 //#############################################################################
-                class BlockSharedMemDynCudaBuiltIn
+                class BlockSharedMemDynHipBuiltIn
                 {
                 public:
-                    using BlockSharedMemDynBase = BlockSharedMemDynCudaBuiltIn;
+                    using BlockSharedMemDynBase = BlockSharedMemDynHipBuiltIn;
 
                     //-----------------------------------------------------------------------------
                     //! Default constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY BlockSharedMemDynCudaBuiltIn() = default;
+                    ALPAKA_FN_ACC_HIP_ONLY BlockSharedMemDynHipBuiltIn() = default;
                     //-----------------------------------------------------------------------------
                     //! Copy constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY BlockSharedMemDynCudaBuiltIn(BlockSharedMemDynCudaBuiltIn const &) = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY BlockSharedMemDynHipBuiltIn(BlockSharedMemDynHipBuiltIn const &) = delete;
                     //-----------------------------------------------------------------------------
                     //! Move constructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY BlockSharedMemDynCudaBuiltIn(BlockSharedMemDynCudaBuiltIn &&) = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY BlockSharedMemDynHipBuiltIn(BlockSharedMemDynHipBuiltIn &&) = delete;
                     //-----------------------------------------------------------------------------
                     //! Copy assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY auto operator=(BlockSharedMemDynCudaBuiltIn const &) -> BlockSharedMemDynCudaBuiltIn & = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY auto operator=(BlockSharedMemDynHipBuiltIn const &) -> BlockSharedMemDynHipBuiltIn & = delete;
                     //-----------------------------------------------------------------------------
                     //! Move assignment operator.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY auto operator=(BlockSharedMemDynCudaBuiltIn &&) -> BlockSharedMemDynCudaBuiltIn & = delete;
+                    ALPAKA_FN_ACC_HIP_ONLY auto operator=(BlockSharedMemDynHipBuiltIn &&) -> BlockSharedMemDynHipBuiltIn & = delete;
                     //-----------------------------------------------------------------------------
                     //! Destructor.
                     //-----------------------------------------------------------------------------
-                    ALPAKA_FN_ACC_CUDA_ONLY /*virtual*/ ~BlockSharedMemDynCudaBuiltIn() = default;
+                    ALPAKA_FN_ACC_HIP_ONLY /*virtual*/ ~BlockSharedMemDynHipBuiltIn() = default;
                 };
 
                 namespace traits
@@ -80,19 +80,19 @@ namespace alpaka
                         typename T>
                     struct GetMem<
                         T,
-                        BlockSharedMemDynCudaBuiltIn>
+                        BlockSharedMemDynHipBuiltIn>
                     {
                         //-----------------------------------------------------------------------------
                         //
                         //-----------------------------------------------------------------------------
-                        ALPAKA_FN_ACC_CUDA_ONLY static auto getMem(
-                            block::shared::dyn::BlockSharedMemDynCudaBuiltIn const &)
+                        ALPAKA_FN_ACC_HIP_ONLY static auto getMem(
+                            block::shared::dyn::BlockSharedMemDynHipBuiltIn const &)
                         -> T *
                         {
                             // Because unaligned access to variables is not allowed in device code,
                             // we have to use the widest possible type to have all types aligned correctly.
-                            // See: http://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#shared
-                            // http://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#vector-types
+                            // See: http://docs.nvidia.com/hip/hip-c-programming-guide/index.html#shared
+                            // http://docs.nvidia.com/hip/hip-c-programming-guide/index.html#vector-types
                             extern __shared__ float4 shMem[];
                             return reinterpret_cast<T *>(shMem);
                         }

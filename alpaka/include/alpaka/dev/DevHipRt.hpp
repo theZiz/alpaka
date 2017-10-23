@@ -23,14 +23,14 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
 #include <alpaka/dev/Traits.hpp>        // dev::traits::DevType
 #include <alpaka/mem/buf/Traits.hpp>    // mem::buf::traits::BufType
 #include <alpaka/pltf/Traits.hpp>       // pltf::traits::PltfType
 #include <alpaka/wait/Traits.hpp>       // CurrentThreadWaitFor
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
 
 namespace alpaka
 {
@@ -43,44 +43,44 @@ namespace alpaka
                 typename TSfinae>
             struct GetDevByIdx;
         }
-        class PltfCudaRt;
+        class PltfHipRt;
     }
 
     namespace dev
     {
         //#############################################################################
-        //! The CUDA RT device handle.
+        //! The HIP RT device handle.
         //#############################################################################
-        class DevCudaRt
+        class DevHipRt
         {
-            friend struct pltf::traits::GetDevByIdx<pltf::PltfCudaRt>;
+            friend struct pltf::traits::GetDevByIdx<pltf::PltfHipRt>;
 
         protected:
             //-----------------------------------------------------------------------------
             //! Constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST DevCudaRt() = default;
+            ALPAKA_FN_HOST DevHipRt() = default;
         public:
             //-----------------------------------------------------------------------------
             //! Copy constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST DevCudaRt(DevCudaRt const &) = default;
+            ALPAKA_FN_HOST DevHipRt(DevHipRt const &) = default;
             //-----------------------------------------------------------------------------
             //! Move constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST DevCudaRt(DevCudaRt &&) = default;
+            ALPAKA_FN_HOST DevHipRt(DevHipRt &&) = default;
             //-----------------------------------------------------------------------------
             //! Copy assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(DevCudaRt const &) -> DevCudaRt & = default;
+            ALPAKA_FN_HOST auto operator=(DevHipRt const &) -> DevHipRt & = default;
             //-----------------------------------------------------------------------------
             //! Move assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator=(DevCudaRt &&) -> DevCudaRt & = default;
+            ALPAKA_FN_HOST auto operator=(DevHipRt &&) -> DevHipRt & = default;
             //-----------------------------------------------------------------------------
             //! Equality comparison operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator==(DevCudaRt const & rhs) const
+            ALPAKA_FN_HOST auto operator==(DevHipRt const & rhs) const
             -> bool
             {
                 return m_iDevice == rhs.m_iDevice;
@@ -88,7 +88,7 @@ namespace alpaka
             //-----------------------------------------------------------------------------
             //! Inequality comparison operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST auto operator!=(DevCudaRt const & rhs) const
+            ALPAKA_FN_HOST auto operator!=(DevHipRt const & rhs) const
             -> bool
             {
                 return !((*this) == rhs);
@@ -104,17 +104,17 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT device name get trait specialization.
+            //! The HIP RT device name get trait specialization.
             //#############################################################################
             template<>
             struct GetName<
-                dev::DevCudaRt>
+                dev::DevHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto getName(
-                    dev::DevCudaRt const & dev)
+                    dev::DevHipRt const & dev)
                 -> std::string
                 {
                     hipDeviceProp_t hipDevProp;
@@ -128,17 +128,17 @@ namespace alpaka
             };
 
             //#############################################################################
-            //! The CUDA RT device available memory get trait specialization.
+            //! The HIP RT device available memory get trait specialization.
             //#############################################################################
             template<>
             struct GetMemBytes<
-                dev::DevCudaRt>
+                dev::DevHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto getMemBytes(
-                    dev::DevCudaRt const & dev)
+                    dev::DevHipRt const & dev)
                 -> std::size_t
                 {
                     // Set the current device to wait for.
@@ -149,7 +149,7 @@ namespace alpaka
                     std::size_t freeInternal(0u);
                     std::size_t totalInternal(0u);
 
-                    // \TODO: Check which is faster: cudaMemGetInfo().totalInternal vs cudaGetDeviceProperties().totalGlobalMem
+                    // \TODO: Check which is faster: hipMemGetInfo().totalInternal vs hipGetDeviceProperties().totalGlobalMem
                     ALPAKA_HIP_RT_CHECK(
                         hipMemGetInfo(
                             &freeInternal,
@@ -160,17 +160,17 @@ namespace alpaka
             };
 
             //#############################################################################
-            //! The CUDA RT device free memory get trait specialization.
+            //! The HIP RT device free memory get trait specialization.
             //#############################################################################
             template<>
             struct GetFreeMemBytes<
-                dev::DevCudaRt>
+                dev::DevHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto getFreeMemBytes(
-                    dev::DevCudaRt const & dev)
+                    dev::DevHipRt const & dev)
                 -> std::size_t
                 {
                     // Set the current device to wait for.
@@ -191,17 +191,17 @@ namespace alpaka
             };
 
             //#############################################################################
-            //! The CUDA RT device reset trait specialization.
+            //! The HIP RT device reset trait specialization.
             //#############################################################################
             template<>
             struct Reset<
-                dev::DevCudaRt>
+                dev::DevHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto reset(
-                    dev::DevCudaRt const & dev)
+                    dev::DevHipRt const & dev)
                 -> void
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
@@ -224,24 +224,24 @@ namespace alpaka
                 typename TElem,
                 typename TDim,
                 typename TSize>
-            class BufCudaRt;
+            class BufHipRt;
 
             namespace traits
             {
                 //#############################################################################
-                //! The CUDA RT device memory buffer type trait specialization.
+                //! The HIP RT device memory buffer type trait specialization.
                 //#############################################################################
                 template<
                     typename TElem,
                     typename TDim,
                     typename TSize>
                 struct BufType<
-                    dev::DevCudaRt,
+                    dev::DevHipRt,
                     TElem,
                     TDim,
                     TSize>
                 {
-                    using type = mem::buf::BufCudaRt<TElem, TDim, TSize>;
+                    using type = mem::buf::BufHipRt<TElem, TDim, TSize>;
                 };
             }
         }
@@ -251,13 +251,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT device platform type trait specialization.
+            //! The HIP RT device platform type trait specialization.
             //#############################################################################
             template<>
             struct PltfType<
-                dev::DevCudaRt>
+                dev::DevHipRt>
             {
-                using type = pltf::PltfCudaRt;
+                using type = pltf::PltfHipRt;
             };
         }
     }
@@ -266,20 +266,20 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The thread CUDA device wait specialization.
+            //! The thread HIP device wait specialization.
             //!
             //! Blocks until the device has completed all preceding requested tasks.
             //! Tasks that are enqueued or streams that are created after this call is made are not waited for.
             //#############################################################################
             template<>
             struct CurrentThreadWaitFor<
-                dev::DevCudaRt>
+                dev::DevHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto currentThreadWaitFor(
-                    dev::DevCudaRt const & dev)
+                    dev::DevHipRt const & dev)
                 -> void
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;

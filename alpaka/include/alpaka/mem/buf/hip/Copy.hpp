@@ -23,18 +23,18 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, __HIPCC__
 
-#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's CUDA counterpart)
-#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's CUDA counterpart)
+#include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's HIP counterpart)
+#include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's HIP counterpart)
 
 #include <alpaka/dev/DevCpu.hpp>                // dev::DevCpu
-#include <alpaka/dev/DevHipRt.hpp>             // dev::DevHipRt (as of now, the CUDA version itself is used)
+#include <alpaka/dev/DevHipRt.hpp>             // dev::DevHipRt (as of now, the HIP version itself is used)
 #include <alpaka/dim/DimIntegralConst.hpp>      // dim::DimInt<N>
 #include <alpaka/extent/Traits.hpp>             // mem::view::getXXX
 #include <alpaka/mem/view/Traits.hpp>           // mem::view::Copy
 
-#include <alpaka/core/Hip.hpp>		    // cudaMalloc,...  		as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/core/Hip.hpp>		    // hipMalloc,...  		as of now, just a renamed copy of it's HIP coutnerpart
 
 #include <cassert>                              // assert
 
@@ -44,12 +44,12 @@ namespace alpaka
     {
         namespace view
         {
-            namespace cuda
+            namespace hip
             {
                 namespace detail
                 {
                     //#############################################################################
-                    //! The CUDA memory copy trait.
+                    //! The HIP memory copy trait.
                     //#############################################################################
                     template<
                         typename TDim,
@@ -59,7 +59,7 @@ namespace alpaka
                     struct TaskCopy;
 
                     //#############################################################################
-                    //! The 1D CUDA memory copy trait.
+                    //! The 1D HIP memory copy trait.
                     //#############################################################################
                     template<
                         typename TViewDst,
@@ -91,10 +91,10 @@ namespace alpaka
                             TViewDst & viewDst,
                             TViewSrc const & viewSrc,
                             TExtent const & extent,
-                            cudaMemcpyKind const & cudaMemCpyKind,
+                            hipMemcpyKind const & hipMemCpyKind,
                             int const & iDstDevice,
                             int const & iSrcDevice) :
-                                m_cudaMemCpyKind(cudaMemCpyKind),
+                                m_hipMemCpyKind(hipMemCpyKind),
                                 m_iDstDevice(iDstDevice),
                                 m_iSrcDevice(iSrcDevice),
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
@@ -131,7 +131,7 @@ namespace alpaka
                                 << std::endl;
                         }
 #endif
-                        cudaMemcpyKind m_cudaMemCpyKind;
+                        hipMemcpyKind m_hipMemCpyKind;
                         int m_iDstDevice;
                         int m_iSrcDevice;
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
@@ -144,7 +144,7 @@ namespace alpaka
                         void const * m_srcMemNative;
                     };
                     //#############################################################################
-                    //! The 2D CUDA memory copy trait.
+                    //! The 2D HIP memory copy trait.
                     //#############################################################################
                     template<
                         typename TViewDst,
@@ -176,10 +176,10 @@ namespace alpaka
                             TViewDst & viewDst,
                             TViewSrc const & viewSrc,
                             TExtent const & extent,
-                            cudaMemcpyKind const & cudaMemCpyKind,
+                            hipMemcpyKind const & hipMemCpyKind,
                             int const & iDstDevice,
                             int const & iSrcDevice) :
-                                m_cudaMemCpyKind(cudaMemCpyKind),
+                                m_hipMemCpyKind(hipMemCpyKind),
                                 m_iDstDevice(iDstDevice),
                                 m_iSrcDevice(iSrcDevice),
 #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
@@ -235,7 +235,7 @@ namespace alpaka
                                 << std::endl;
                         }
 #endif
-                        cudaMemcpyKind m_cudaMemCpyKind;
+                        hipMemcpyKind m_hipMemCpyKind;
                         int m_iDstDevice;
                         int m_iSrcDevice;
 
@@ -260,7 +260,7 @@ namespace alpaka
                         void const * m_srcMemNative;
                     };
                     //#############################################################################
-                    //! The 3D CUDA memory copy trait.
+                    //! The 3D HIP memory copy trait.
                     //#############################################################################
                     template<
                         typename TViewDst,
@@ -292,10 +292,10 @@ namespace alpaka
                             TViewDst & viewDst,
                             TViewSrc const & viewSrc,
                             TExtent const & extent,
-                            cudaMemcpyKind const & cudaMemCpyKind,
+                            hipMemcpyKind const & hipMemCpyKind,
                             int const & iDstDevice,
                             int const & iSrcDevice) :
-                                m_cudaMemCpyKind(cudaMemCpyKind),
+                                m_hipMemCpyKind(hipMemCpyKind),
 
                                 m_iDstDevice(iDstDevice),
                                 m_iSrcDevice(iSrcDevice),
@@ -362,7 +362,7 @@ namespace alpaka
                                 << std::endl;
                         }
 #endif
-                        cudaMemcpyKind m_cudaMemCpyKind;
+                        hipMemcpyKind m_hipMemCpyKind;
 
                         int m_iDstDevice;
                         int m_iSrcDevice;
@@ -398,14 +398,14 @@ namespace alpaka
             namespace traits
             {
                 //#############################################################################
-                //! The CUDA to CPU memory copy trait specialization.
+                //! The HIP to CPU memory copy trait specialization.
                 //#############################################################################
                 template<
                     typename TDim>
                 struct TaskCopy<
                     TDim,
                     dev::DevCpu,
-                    dev::DevCudaRt>
+                    dev::DevHipRt>
                 {
                     //-----------------------------------------------------------------------------
                     //!
@@ -418,7 +418,7 @@ namespace alpaka
                         TViewDst & viewDst,
                         TViewSrc const & viewSrc,
                         TExtent const & extent)
-                    -> mem::view::cuda::detail::TaskCopy<
+                    -> mem::view::hip::detail::TaskCopy<
                         TDim,
                         TViewDst,
                         TViewSrc,
@@ -430,7 +430,7 @@ namespace alpaka
                             dev::getDev(viewSrc).m_iDevice);
 
                         return
-                            mem::view::cuda::detail::TaskCopy<
+                            mem::view::hip::detail::TaskCopy<
                                 TDim,
                                 TViewDst,
                                 TViewSrc,
@@ -438,19 +438,19 @@ namespace alpaka
                                     viewDst,
                                     viewSrc,
                                     extent,
-                                    cudaMemcpyDeviceToHost,
+                                    hipMemcpyDeviceToHost,
                                     iDevice,
                                     iDevice);
                     }
                 };
                 //#############################################################################
-                //! The CPU to CUDA memory copy trait specialization.
+                //! The CPU to HIP memory copy trait specialization.
                 //#############################################################################
                 template<
                     typename TDim>
                 struct TaskCopy<
                     TDim,
-                    dev::DevCudaRt,
+                    dev::DevHipRt,
                     dev::DevCpu>
                 {
                     //-----------------------------------------------------------------------------
@@ -464,7 +464,7 @@ namespace alpaka
                         TViewDst & viewDst,
                         TViewSrc const & viewSrc,
                         TExtent const & extent)
-                    -> mem::view::cuda::detail::TaskCopy<
+                    -> mem::view::hip::detail::TaskCopy<
                         TDim,
                         TViewDst,
                         TViewSrc,
@@ -476,7 +476,7 @@ namespace alpaka
                             dev::getDev(viewDst).m_iDevice);
 
                         return
-                            mem::view::cuda::detail::TaskCopy<
+                            mem::view::hip::detail::TaskCopy<
                                 TDim,
                                 TViewDst,
                                 TViewSrc,
@@ -484,20 +484,20 @@ namespace alpaka
                                     viewDst,
                                     viewSrc,
                                     extent,
-                                    cudaMemcpyHostToDevice,
+                                    hipMemcpyHostToDevice,
                                     iDevice,
                                     iDevice);
                     }
                 };
                 //#############################################################################
-                //! The CUDA to CUDA memory copy trait specialization.
+                //! The HIP to HIP memory copy trait specialization.
                 //#############################################################################
                 template<
                     typename TDim>
                 struct TaskCopy<
                     TDim,
-                    dev::DevCudaRt,
-                    dev::DevCudaRt>
+                    dev::DevHipRt,
+                    dev::DevHipRt>
                 {
                     //-----------------------------------------------------------------------------
                     //!
@@ -510,7 +510,7 @@ namespace alpaka
                         TViewDst & viewDst,
                         TViewSrc const & viewSrc,
                         TExtent const & extent)
-                    -> mem::view::cuda::detail::TaskCopy<
+                    -> mem::view::hip::detail::TaskCopy<
                         TDim,
                         TViewDst,
                         TViewSrc,
@@ -519,7 +519,7 @@ namespace alpaka
                         ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
                         return
-                            mem::view::cuda::detail::TaskCopy<
+                            mem::view::hip::detail::TaskCopy<
                                 TDim,
                                 TViewDst,
                                 TViewSrc,
@@ -527,200 +527,200 @@ namespace alpaka
                                     viewDst,
                                     viewSrc,
                                     extent,
-                                    cudaMemcpyDeviceToDevice,
+                                    hipMemcpyDeviceToDevice,
                                     dev::getDev(viewDst).m_iDevice,
                                     dev::getDev(viewSrc).m_iDevice);
                     }
                 };
             }
-            namespace cuda
+            namespace hip
             {
                 namespace detail
                 {
                     //-----------------------------------------------------------------------------
                     //!
                     //-----------------------------------------------------------------------------
-                    template<
-                        typename TExtent,
-                        typename TViewSrc,
-                        typename TViewDst>
-                    ALPAKA_FN_HOST static auto buildCudaMemcpy3DParms(
-                        mem::view::cuda::detail::TaskCopy<dim::DimInt<3>, TViewDst, TViewSrc, TExtent> const & task)
-                    -> cudaMemcpy3DParms
-                    {
-                        ALPAKA_DEBUG_FULL_LOG_SCOPE;
+                    //~ template<
+                        //~ typename TExtent,
+                        //~ typename TViewSrc,
+                        //~ typename TViewDst>
+                    //~ ALPAKA_FN_HOST static auto buildHipMemcpy3DParms(
+                        //~ mem::view::hip::detail::TaskCopy<dim::DimInt<3>, TViewDst, TViewSrc, TExtent> const & task)
+                    //~ -> hipMemcpy3DParms
+                    //~ {
+                        //~ ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
-                        auto const & extentWidthBytes(task.m_extentWidthBytes);
-                        auto const & dstWidth(task.m_dstWidth);
-                        auto const & srcWidth(task.m_srcWidth);
+                        //~ auto const & extentWidthBytes(task.m_extentWidthBytes);
+                        //~ auto const & dstWidth(task.m_dstWidth);
+                        //~ auto const & srcWidth(task.m_srcWidth);
 
-                        auto const & extentHeight(task.m_extentHeight);
-                        //auto const & dstHeight(task.m_dstHeight);
-                        //auto const & srcHeight(task.m_srcHeight);
+                        //~ auto const & extentHeight(task.m_extentHeight);
+                        //~ //auto const & dstHeight(task.m_dstHeight);
+                        //~ //auto const & srcHeight(task.m_srcHeight);
 
-                        auto const & extentDepth(task.m_extentDepth);
+                        //~ auto const & extentDepth(task.m_extentDepth);
 
-                        auto const & dstPitchBytesX(task.m_dstpitchBytesX);
-                        auto const & srcPitchBytesX(task.m_srcpitchBytesX);
-                        auto const & dstPitchBytesY(task.m_dstPitchBytesY);
-                        auto const & srcPitchBytesY(task.m_srcPitchBytesY);
+                        //~ auto const & dstPitchBytesX(task.m_dstpitchBytesX);
+                        //~ auto const & srcPitchBytesX(task.m_srcpitchBytesX);
+                        //~ auto const & dstPitchBytesY(task.m_dstPitchBytesY);
+                        //~ auto const & srcPitchBytesY(task.m_srcPitchBytesY);
 
-                        auto const & dstNativePtr(task.m_dstMemNative);
-                        auto const & srcNativePtr(task.m_srcMemNative);
+                        //~ auto const & dstNativePtr(task.m_dstMemNative);
+                        //~ auto const & srcNativePtr(task.m_srcMemNative);
 
-                        // Fill CUDA parameter structure.
-                        cudaMemcpy3DParms cudaMemCpy3DParms = {};
-                        //cudaMemCpy3DParms.srcArray;     // Either srcArray or srcPtr.
-                        //cudaMemCpy3DParms.srcPos;       // Optional. Offset in bytes.
+                        //~ // Fill HIP parameter structure.
+                        //~ hipMemcpy3DParms hipMemCpy3DParms = {};
+                        //~ //hipMemCpy3DParms.srcArray;     // Either srcArray or srcPtr.
+                        //~ //hipMemCpy3DParms.srcPos;       // Optional. Offset in bytes.
 
-                        cudaMemCpy3DParms.srcPtr =
-                            make_cudaPitchedPtr(
-                                const_cast<void *>(srcNativePtr),
-                                static_cast<std::size_t>(srcPitchBytesX),
-                                static_cast<std::size_t>(srcWidth),
-                                static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
-                        //cudaMemCpy3DParms.dstArray;     // Either dstArray or dstPtr.
-                        //cudaMemCpy3DParms.dstPos;       // Optional. Offset in bytes.
-                        cudaMemCpy3DParms.dstPtr =
-                            make_cudaPitchedPtr(
-                                dstNativePtr,
-                                static_cast<std::size_t>(dstPitchBytesX),
-                                static_cast<std::size_t>(dstWidth),
-                                static_cast<std::size_t>(dstPitchBytesY/dstPitchBytesX));
-                        cudaMemCpy3DParms.extent =
-                            make_cudaExtent(
-                                static_cast<std::size_t>(extentWidthBytes),
-                                static_cast<std::size_t>(extentHeight),
-                                static_cast<std::size_t>(extentDepth));
-                        cudaMemCpy3DParms.kind = task.m_cudaMemCpyKind;
+                        //~ hipMemCpy3DParms.srcPtr =
+                            //~ make_hipPitchedPtr(
+                                //~ const_cast<void *>(srcNativePtr),
+                                //~ static_cast<std::size_t>(srcPitchBytesX),
+                                //~ static_cast<std::size_t>(srcWidth),
+                                //~ static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
+                        //~ //hipMemCpy3DParms.dstArray;     // Either dstArray or dstPtr.
+                        //~ //hipMemCpy3DParms.dstPos;       // Optional. Offset in bytes.
+                        //~ hipMemCpy3DParms.dstPtr =
+                            //~ make_hipPitchedPtr(
+                                //~ dstNativePtr,
+                                //~ static_cast<std::size_t>(dstPitchBytesX),
+                                //~ static_cast<std::size_t>(dstWidth),
+                                //~ static_cast<std::size_t>(dstPitchBytesY/dstPitchBytesX));
+                        //~ hipMemCpy3DParms.extent =
+                            //~ make_hipExtent(
+                                //~ static_cast<std::size_t>(extentWidthBytes),
+                                //~ static_cast<std::size_t>(extentHeight),
+                                //~ static_cast<std::size_t>(extentDepth));
+                        //~ hipMemCpy3DParms.kind = task.m_hipMemCpyKind;
 
-                        return cudaMemCpy3DParms;
-                    }
+                        //~ return hipMemCpy3DParms;
+                    //~ }
                     //-----------------------------------------------------------------------------
                     //!
                     //-----------------------------------------------------------------------------
 
-                    template<
-                        typename TViewDst,
-                        typename TViewSrc,
-                        typename TExtent>
-                    ALPAKA_FN_HOST static auto buildCudaMemcpy3DPeerParms(
-                        mem::view::cuda::detail::TaskCopy<dim::DimInt<2>, TViewDst, TViewSrc, TExtent> const & task)
-                    -> cudaMemcpy3DPeerParms
-                    {
-                        ALPAKA_DEBUG_FULL_LOG_SCOPE;
+                    //~ template<
+                        //~ typename TViewDst,
+                        //~ typename TViewSrc,
+                        //~ typename TExtent>
+                    //~ ALPAKA_FN_HOST static auto buildHipMemcpy3DPeerParms(
+                        //~ mem::view::hip::detail::TaskCopy<dim::DimInt<2>, TViewDst, TViewSrc, TExtent> const & task)
+                    //~ -> hipMemcpy3DPeerParms
+                    //~ {
+                        //~ ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
-                        auto const & iDstDev(task.m_iDstDevice);
-                        auto const & iSrcDev(task.m_iSrcDevice);
+                        //~ auto const & iDstDev(task.m_iDstDevice);
+                        //~ auto const & iSrcDev(task.m_iSrcDevice);
 
-                        auto const & extentWidthBytes(task.m_extentWidthBytes);
-                        auto const & dstWidth(task.m_dstWidth);
-                        auto const & srcWidth(task.m_srcWidth);
+                        //~ auto const & extentWidthBytes(task.m_extentWidthBytes);
+                        //~ auto const & dstWidth(task.m_dstWidth);
+                        //~ auto const & srcWidth(task.m_srcWidth);
 
-                        auto const & extentHeight(task.m_extentHeight);
-                        //auto const & dstHeight(task.m_dstHeight);
-                        //auto const & srcHeight(task.m_srcHeight);
+                        //~ auto const & extentHeight(task.m_extentHeight);
+                        //~ //auto const & dstHeight(task.m_dstHeight);
+                        //~ //auto const & srcHeight(task.m_srcHeight);
 
-                        auto const extentDepth(1u);
+                        //~ auto const extentDepth(1u);
 
-                        auto const & dstPitchBytesX(task.m_dstpitchBytesX);
-                        auto const & srcPitchBytesX(task.m_srcpitchBytesX);
-                        auto const & dstPitchBytesY(task.m_dstPitchBytesY);
-                        auto const & srcPitchBytesY(task.m_srcPitchBytesY);
+                        //~ auto const & dstPitchBytesX(task.m_dstpitchBytesX);
+                        //~ auto const & srcPitchBytesX(task.m_srcpitchBytesX);
+                        //~ auto const & dstPitchBytesY(task.m_dstPitchBytesY);
+                        //~ auto const & srcPitchBytesY(task.m_srcPitchBytesY);
 
-                        auto const & dstNativePtr(task.m_dstMemNative);
-                        auto const & srcNativePtr(task.m_srcMemNative);
+                        //~ auto const & dstNativePtr(task.m_dstMemNative);
+                        //~ auto const & srcNativePtr(task.m_srcMemNative);
 
-                        // Fill CUDA parameter structure.
-                        cudaMemcpy3DPeerParms cudaMemCpy3DPeerParms = {};
-                        //cudaMemCpy3DPeerParms.dstArray;     // Either dstArray or dstPtr.
-                        cudaMemCpy3DPeerParms.dstDevice = iDstDev;
-                        //cudaMemCpy3DPeerParms.dstPos;       // Optional. Offset in bytes.
-                        cudaMemCpy3DPeerParms.dstPtr =
-                            make_cudaPitchedPtr(
-                                dstNativePtr,
-                                static_cast<std::size_t>(dstPitchBytesX),
-                                static_cast<std::size_t>(dstWidth),
-                                static_cast<std::size_t>(dstPitchBytesY/dstPitchBytesX));
-                        cudaMemCpy3DPeerParms.extent =
-                            make_cudaExtent(
-                                static_cast<std::size_t>(extentWidthBytes),
-                                static_cast<std::size_t>(extentHeight),
-                                static_cast<std::size_t>(extentDepth));
-                        //cudaMemCpy3DPeerParms.srcArray;     // Either srcArray or srcPtr.
-                        cudaMemCpy3DPeerParms.srcDevice = iSrcDev;
-                        //cudaMemCpy3DPeerParms.srcPos;       // Optional. Offset in bytes.
-                        cudaMemCpy3DPeerParms.srcPtr =
-                            make_cudaPitchedPtr(
-                                const_cast<void *>(srcNativePtr),
-                                static_cast<std::size_t>(srcPitchBytesX),
-                                static_cast<std::size_t>(srcWidth),
-                                static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
+                        //~ // Fill HIP parameter structure.
+                        //~ hipMemcpy3DPeerParms hipMemCpy3DPeerParms = {};
+                        //~ //hipMemCpy3DPeerParms.dstArray;     // Either dstArray or dstPtr.
+                        //~ hipMemCpy3DPeerParms.dstDevice = iDstDev;
+                        //~ //hipMemCpy3DPeerParms.dstPos;       // Optional. Offset in bytes.
+                        //~ hipMemCpy3DPeerParms.dstPtr =
+                            //~ make_hipPitchedPtr(
+                                //~ dstNativePtr,
+                                //~ static_cast<std::size_t>(dstPitchBytesX),
+                                //~ static_cast<std::size_t>(dstWidth),
+                                //~ static_cast<std::size_t>(dstPitchBytesY/dstPitchBytesX));
+                        //~ hipMemCpy3DPeerParms.extent =
+                            //~ make_hipExtent(
+                                //~ static_cast<std::size_t>(extentWidthBytes),
+                                //~ static_cast<std::size_t>(extentHeight),
+                                //~ static_cast<std::size_t>(extentDepth));
+                        //~ //hipMemCpy3DPeerParms.srcArray;     // Either srcArray or srcPtr.
+                        //~ hipMemCpy3DPeerParms.srcDevice = iSrcDev;
+                        //~ //hipMemCpy3DPeerParms.srcPos;       // Optional. Offset in bytes.
+                        //~ hipMemCpy3DPeerParms.srcPtr =
+                            //~ make_hipPitchedPtr(
+                                //~ const_cast<void *>(srcNativePtr),
+                                //~ static_cast<std::size_t>(srcPitchBytesX),
+                                //~ static_cast<std::size_t>(srcWidth),
+                                //~ static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
 
-                        return cudaMemCpy3DPeerParms;
-                    }
+                        //~ return hipMemCpy3DPeerParms;
+                    //~ }
                     //-----------------------------------------------------------------------------
                     //!
                     //-----------------------------------------------------------------------------
-                    template<
-                        typename TViewDst,
-                        typename TViewSrc,
-                        typename TExtent>
-                    ALPAKA_FN_HOST static auto buildCudaMemcpy3DPeerParms(
-                        mem::view::cuda::detail::TaskCopy<dim::DimInt<3>, TViewDst, TViewSrc, TExtent> const & task)
-                    -> cudaMemcpy3DPeerParms
-                    {
-                        ALPAKA_DEBUG_FULL_LOG_SCOPE;
+                    //~ template<
+                        //~ typename TViewDst,
+                        //~ typename TViewSrc,
+                        //~ typename TExtent>
+                    //~ ALPAKA_FN_HOST static auto buildHipMemcpy3DPeerParms(
+                        //~ mem::view::hip::detail::TaskCopy<dim::DimInt<3>, TViewDst, TViewSrc, TExtent> const & task)
+                    //~ -> hipMemcpy3DPeerParms
+                    //~ {
+                        //~ ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
-                        auto const & iDstDev(task.m_iDstDevice);
-                        auto const & iSrcDev(task.m_iSrcDevice);
+                        //~ auto const & iDstDev(task.m_iDstDevice);
+                        //~ auto const & iSrcDev(task.m_iSrcDevice);
 
-                        auto const & extentWidthBytes(task.m_extentWidthBytes);
-                        auto const & dstWidth(task.m_dstWidth);
-                        auto const & srcWidth(task.m_srcWidth);
+                        //~ auto const & extentWidthBytes(task.m_extentWidthBytes);
+                        //~ auto const & dstWidth(task.m_dstWidth);
+                        //~ auto const & srcWidth(task.m_srcWidth);
 
-                        auto const & extentHeight(task.m_extentHeight);
-                        //auto const & dstHeight(task.m_dstHeight);
-                        //auto const & srcHeight(task.m_srcHeight);
+                        //~ auto const & extentHeight(task.m_extentHeight);
+                        //~ //auto const & dstHeight(task.m_dstHeight);
+                        //~ //auto const & srcHeight(task.m_srcHeight);
 
-                        auto const & extentDepth(task.m_extentDepth);
+                        //~ auto const & extentDepth(task.m_extentDepth);
 
-                        auto const & dstPitchBytesX(task.m_dstpitchBytesX);
-                        auto const & srcPitchBytesX(task.m_srcpitchBytesX);
-                        auto const & dstPitchBytesY(task.m_dstPitchBytesY);
-                        auto const & srcPitchBytesY(task.m_srcPitchBytesY);
+                        //~ auto const & dstPitchBytesX(task.m_dstpitchBytesX);
+                        //~ auto const & srcPitchBytesX(task.m_srcpitchBytesX);
+                        //~ auto const & dstPitchBytesY(task.m_dstPitchBytesY);
+                        //~ auto const & srcPitchBytesY(task.m_srcPitchBytesY);
 
-                        auto const & dstNativePtr(task.m_dstMemNative);
-                        auto const & srcNativePtr(task.m_srcMemNative);
+                        //~ auto const & dstNativePtr(task.m_dstMemNative);
+                        //~ auto const & srcNativePtr(task.m_srcMemNative);
 
-                        // Fill CUDA parameter structure.
-                        cudaMemcpy3DPeerParms cudaMemCpy3DPeerParms = {};
-                        //cudaMemCpy3DPeerParms.dstArray;     // Either dstArray or dstPtr.
-                        cudaMemCpy3DPeerParms.dstDevice = iDstDev;
-                        //cudaMemCpy3DPeerParms.dstPos;       // Optional. Offset in bytes.
-                        cudaMemCpy3DPeerParms.dstPtr =
-                            make_cudaPitchedPtr(
-                                dstNativePtr,
-                                static_cast<std::size_t>(dstPitchBytesX),
-                                static_cast<std::size_t>(dstWidth),
-                                static_cast<std::size_t>(dstPitchBytesY/dstPitchBytesX));
-                        cudaMemCpy3DPeerParms.extent =
-                            make_cudaExtent(
-                                static_cast<std::size_t>(extentWidthBytes),
-                                static_cast<std::size_t>(extentHeight),
-                                static_cast<std::size_t>(extentDepth));
-                        //cudaMemCpy3DPeerParms.srcArray;     // Either srcArray or srcPtr.
-                        cudaMemCpy3DPeerParms.srcDevice = iSrcDev;
-                        //cudaMemCpy3DPeerParms.srcPos;       // Optional. Offset in bytes.
-                        cudaMemCpy3DPeerParms.srcPtr =
-                            make_cudaPitchedPtr(
-                                const_cast<void *>(srcNativePtr),
-                                static_cast<std::size_t>(srcPitchBytesX),
-                                static_cast<std::size_t>(srcWidth),
-                                static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
+                        //~ // Fill HIP parameter structure.
+                        //~ hipMemcpy3DPeerParms hipMemCpy3DPeerParms = {};
+                        //~ //hipMemCpy3DPeerParms.dstArray;     // Either dstArray or dstPtr.
+                        //~ hipMemCpy3DPeerParms.dstDevice = iDstDev;
+                        //~ //hipMemCpy3DPeerParms.dstPos;       // Optional. Offset in bytes.
+                        //~ hipMemCpy3DPeerParms.dstPtr =
+                            //~ make_hipPitchedPtr(
+                                //~ dstNativePtr,
+                                //~ static_cast<std::size_t>(dstPitchBytesX),
+                                //~ static_cast<std::size_t>(dstWidth),
+                                //~ static_cast<std::size_t>(dstPitchBytesY/dstPitchBytesX));
+                        //~ hipMemCpy3DPeerParms.extent =
+                            //~ make_hipExtent(
+                                //~ static_cast<std::size_t>(extentWidthBytes),
+                                //~ static_cast<std::size_t>(extentHeight),
+                                //~ static_cast<std::size_t>(extentDepth));
+                        //~ //hipMemCpy3DPeerParms.srcArray;     // Either srcArray or srcPtr.
+                        //~ hipMemCpy3DPeerParms.srcDevice = iSrcDev;
+                        //~ //hipMemCpy3DPeerParms.srcPos;       // Optional. Offset in bytes.
+                        //~ hipMemCpy3DPeerParms.srcPtr =
+                            //~ make_hipPitchedPtr(
+                                //~ const_cast<void *>(srcNativePtr),
+                                //~ static_cast<std::size_t>(srcPitchBytesX),
+                                //~ static_cast<std::size_t>(srcWidth),
+                                //~ static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
 
-                        return cudaMemCpy3DPeerParms;
-                    } 
+                        //~ return hipMemCpy3DPeerParms;
+                    //~ } 
                 }
             }
         }
@@ -731,22 +731,22 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA async device stream 1D copy enqueue trait specialization.
+            //! The HIP async device stream 1D copy enqueue trait specialization.
             //#############################################################################
             template<
                 typename TExtent,
                 typename TViewSrc,
                 typename TViewDst>
             struct Enqueue<
-                stream::StreamCudaRtAsync,
-                mem::view::cuda::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent>>
+                stream::StreamHipRtAsync,
+                mem::view::hip::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent>>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtAsync & stream,
-                    mem::view::cuda::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent> const & task)
+                    stream::StreamHipRtAsync & stream,
+                    mem::view::hip::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent> const & task)
                 -> void
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
@@ -764,52 +764,52 @@ namespace alpaka
 
                     if(iDstDev == iSrcDev)
                     {
-                        auto const & cudaMemCpyKind(task.m_cudaMemCpyKind);
+                        auto const & hipMemCpyKind(task.m_hipMemCpyKind);
 
                         // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipSetDevice(
                                 iDstDev));
                         // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpyAsync(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipMemcpyAsync(
                                 dstNativePtr,
                                 srcNativePtr,
                                 static_cast<std::size_t>(extentWidthBytes),
-                                cudaMemCpyKind,
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
+                                hipMemCpyKind,
+                                stream.m_spStreamHipRtAsyncImpl->m_HipStream));
                     }
                     else
                     {
                         // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpyPeerAsync(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipMemcpyPeerAsync(
                                 dstNativePtr,
                                 iDstDev,
                                 srcNativePtr,
                                 iSrcDev,
                                 static_cast<std::size_t>(extentWidthBytes),
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
+                                stream.m_spStreamHipRtAsyncImpl->m_HipStream));
                     }
                 }
             };
             //#############################################################################
-            //! The CUDA sync device stream 1D copy enqueue trait specialization.
+            //! The HIP sync device stream 1D copy enqueue trait specialization.
             //#############################################################################
             template<
                 typename TExtent,
                 typename TViewSrc,
                 typename TViewDst>
             struct Enqueue<
-                stream::StreamCudaRtSync,
-                mem::view::cuda::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent>>
+                stream::StreamHipRtSync,
+                mem::view::hip::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent>>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtSync &,
-                    mem::view::cuda::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent> const & task)
+                    stream::StreamHipRtSync &,
+                    mem::view::hip::detail::TaskCopy<dim::DimInt<1u>, TViewDst, TViewSrc, TExtent> const & task)
                 -> void
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
@@ -827,25 +827,25 @@ namespace alpaka
 
                     if(iDstDev == iSrcDev)
                     {
-                        auto const & cudaMemCpyKind(task.m_cudaMemCpyKind);
+                        auto const & hipMemCpyKind(task.m_hipMemCpyKind);
 
                         // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipSetDevice(
                                 iDstDev));
                         // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipMemcpy(
                                 dstNativePtr,
                                 srcNativePtr,
                                 static_cast<std::size_t>(extentWidthBytes),
-                                cudaMemCpyKind));
+                                hipMemCpyKind));
                     }
                     else
                     {
                         // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpyPeer(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipMemcpyPeer(
                                 dstNativePtr,
                                 iDstDev,
                                 srcNativePtr,
@@ -855,22 +855,22 @@ namespace alpaka
                 }
             };
             //#############################################################################
-            //! The CUDA async device stream 2D copy enqueue trait specialization.
+            //! The HIP async device stream 2D copy enqueue trait specialization.
             //#############################################################################
             template<
                 typename TExtent,
                 typename TViewSrc,
                 typename TViewDst>
             struct Enqueue<
-                stream::StreamCudaRtAsync,
-                mem::view::cuda::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent>>
+                stream::StreamHipRtAsync,
+                mem::view::hip::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent>>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtAsync & stream,
-                    mem::view::cuda::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent> const & task)
+                    stream::StreamHipRtAsync & stream,
+                    mem::view::hip::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent> const & task)
                 -> void
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
@@ -892,56 +892,56 @@ namespace alpaka
                         auto const & dstNativePtr(task.m_dstMemNative);
                         auto const & srcNativePtr(task.m_srcMemNative);
 
-                        auto const & cudaMemCpyKind(task.m_cudaMemCpyKind);
+                        auto const & hipMemCpyKind(task.m_hipMemCpyKind);
 
                         // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipSetDevice(
                                 iDstDev));
                         // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy2DAsync(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipMemcpy2DAsync(
                                 dstNativePtr,
                                 static_cast<std::size_t>(dstPitchBytesX),
                                 srcNativePtr,
                                 static_cast<std::size_t>(srcPitchBytesX),
                                 static_cast<std::size_t>(extentWidthBytes),
                                 static_cast<std::size_t>(extentHeight),
-                                cudaMemCpyKind,
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
+                                hipMemCpyKind,
+                                stream.m_spStreamHipRtAsyncImpl->m_HipStream));
                     }
                     else
                     {
-                        // There is no cudaMemcpy2DPeerAsync, therefore we use cudaMemcpy3DPeerAsync.
+                        // There is no hipMemcpy2DPeerAsync, therefore we use hipMemcpy3DPeerAsync.
                         // Create the struct describing the copy.
-                        cudaMemcpy3DPeerParms const cudaMemCpy3DPeerParms(
-                            mem::view::cuda::detail::buildCudaMemcpy3DPeerParms(
-                                task));
+                        //~ hipMemcpy3DPeerParms const hipMemCpy3DPeerParms(
+                            //~ mem::view::hip::detail::buildHipMemcpy3DPeerParms(
+                                //~ task));
                         // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy3DPeerAsync(
-                                &cudaMemCpy3DPeerParms,
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipMemcpy3DPeerAsync(
+                                //~ &hipMemCpy3DPeerParms,
+                                //~ stream.m_spStreamHipRtAsyncImpl->m_HipStream));
                     }
                 }
             };
             //#############################################################################
-            //! The CUDA sync device stream 2D copy enqueue trait specialization.
+            //! The HIP sync device stream 2D copy enqueue trait specialization.
             //#############################################################################
             template<
                 typename TExtent,
                 typename TViewSrc,
                 typename TViewDst>
             struct Enqueue<
-                stream::StreamCudaRtSync,
-                mem::view::cuda::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent>>
+                stream::StreamHipRtSync,
+                mem::view::hip::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent>>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtSync &,
-                    mem::view::cuda::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent> const & task)
+                    stream::StreamHipRtSync &,
+                    mem::view::hip::detail::TaskCopy<dim::DimInt<2u>, TViewDst, TViewSrc, TExtent> const & task)
                 -> void
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
@@ -963,149 +963,149 @@ namespace alpaka
                         auto const & dstNativePtr(task.m_dstMemNative);
                         auto const & srcNativePtr(task.m_srcMemNative);
 
-                        auto const & cudaMemCpyKind(task.m_cudaMemCpyKind);
+                        auto const & hipMemCpyKind(task.m_hipMemCpyKind);
 
                         // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipSetDevice(
                                 iDstDev));
                         // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy2D(
+                        ALPAKA_HIP_RT_CHECK(
+                            hipMemcpy2D(
                                 dstNativePtr,
                                 static_cast<std::size_t>(dstPitchBytesX),
                                 srcNativePtr,
                                 static_cast<std::size_t>(srcPitchBytesX),
                                 static_cast<std::size_t>(extentWidthBytes),
                                 static_cast<std::size_t>(extentHeight),
-                                cudaMemCpyKind));
+                                hipMemCpyKind));
                     }
                     else
                     {
-                        // There is no cudaMemcpy2DPeerAsync, therefore we use cudaMemcpy3DPeerAsync.
-                        // Create the struct describing the copy.
-                        cudaMemcpy3DPeerParms const cudaMemCpy3DPeerParms(
-                            mem::view::cuda::detail::buildCudaMemcpy3DPeerParms(
-                                task));
-                        // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy3DPeer(
-                                &cudaMemCpy3DPeerParms));
+                        //~ // There is no hipMemcpy2DPeerAsync, therefore we use hipMemcpy3DPeerAsync.
+                        //~ // Create the struct describing the copy.
+                        //~ hipMemcpy3DPeerParms const hipMemCpy3DPeerParms(
+                            //~ mem::view::hip::detail::buildHipMemcpy3DPeerParms(
+                                //~ task));
+                        //~ // Initiate the memory copy.
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipMemcpy3DPeer(
+                                //~ &hipMemCpy3DPeerParms));
                     }
                 }
             };
             //#############################################################################
-            //! The CUDA async device stream 3D copy enqueue trait specialization.
+            //! The HIP async device stream 3D copy enqueue trait specialization.
             //#############################################################################
-            template<
-                typename TExtent,
-                typename TViewSrc,
-                typename TViewDst>
-            struct Enqueue<
-                stream::StreamCudaRtAsync,
-                mem::view::cuda::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent>>
-            {
-                //-----------------------------------------------------------------------------
-                //
-                //-----------------------------------------------------------------------------
-                ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtAsync & stream,
-                    mem::view::cuda::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent> const & task)
-                -> void
-                {
-                    ALPAKA_DEBUG_FULL_LOG_SCOPE;
+            //~ template<
+                //~ typename TExtent,
+                //~ typename TViewSrc,
+                //~ typename TViewDst>
+            //~ struct Enqueue<
+                //~ stream::StreamHipRtAsync,
+                //~ mem::view::hip::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent>>
+            //~ {
+                //~ //-----------------------------------------------------------------------------
+                //~ //
+                //~ //-----------------------------------------------------------------------------
+                //~ ALPAKA_FN_HOST static auto enqueue(
+                    //~ stream::StreamHipRtAsync & stream,
+                    //~ mem::view::hip::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent> const & task)
+                //~ -> void
+                //~ {
+                    //~ ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
-#if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
-                    task.printDebug();
-#endif
-                    auto const & iDstDev(task.m_iDstDevice);
-                    auto const & iSrcDev(task.m_iSrcDevice);
+//~ #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
+                    //~ task.printDebug();
+//~ #endif
+                    //~ auto const & iDstDev(task.m_iDstDevice);
+                    //~ auto const & iSrcDev(task.m_iSrcDevice);
 
-                    if(iDstDev == iSrcDev)
-                    {
-                        // Create the struct describing the copy.
-                        cudaMemcpy3DParms const cudaMemCpy3DParms(
-                            mem::view::cuda::detail::buildCudaMemcpy3DParms(
-                                task));
-                        // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
-                                iDstDev));
-                        // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy3DAsync(
-                                &cudaMemCpy3DParms,
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
-                    }
-                    else
-                    {
-                        // Create the struct describing the copy.
-                        cudaMemcpy3DPeerParms const cudaMemCpy3DPeerParms(
-                            mem::view::cuda::detail::buildCudaMemcpy3DPeerParms(
-                                task));
-                        // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy3DPeerAsync(
-                                &cudaMemCpy3DPeerParms,
-                                stream.m_spStreamCudaRtAsyncImpl->m_CudaStream));
-                    }
-                }
-            };
+                    //~ if(iDstDev == iSrcDev)
+                    //~ {
+                        //~ // Create the struct describing the copy.
+                        //~ hipMemcpy3DParms const hipMemCpy3DParms(
+                            //~ mem::view::hip::detail::buildHipMemcpy3DParms(
+                                //~ task));
+                        //~ // Set the current device.
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipSetDevice(
+                                //~ iDstDev));
+                        //~ // Initiate the memory copy.
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipMemcpy3DAsync(
+                                //~ &hipMemCpy3DParms,
+                                //~ stream.m_spStreamHipRtAsyncImpl->m_HipStream));
+                    //~ }
+                    //~ else
+                    //~ {
+                        //~ // Create the struct describing the copy.
+                        //~ hipMemcpy3DPeerParms const hipMemCpy3DPeerParms(
+                            //~ mem::view::hip::detail::buildHipMemcpy3DPeerParms(
+                                //~ task));
+                        //~ // Initiate the memory copy.
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipMemcpy3DPeerAsync(
+                                //~ &hipMemCpy3DPeerParms,
+                                //~ stream.m_spStreamHipRtAsyncImpl->m_HipStream));
+                    //~ }
+                //~ }
+            //~ };
             //#############################################################################
-            //! The CUDA sync device stream 3D copy enqueue trait specialization.
+            //! The HIP sync device stream 3D copy enqueue trait specialization.
             //#############################################################################
-            template<
-                typename TExtent,
-                typename TViewSrc,
-                typename TViewDst>
-            struct Enqueue<
-                stream::StreamCudaRtSync,
-                mem::view::cuda::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent>>
-            {
-                //-----------------------------------------------------------------------------
-                //
-                //-----------------------------------------------------------------------------
-                ALPAKA_FN_HOST static auto enqueue(
-                    stream::StreamCudaRtSync &,
-                    mem::view::cuda::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent> const & task)
-                -> void
-                {
-                    ALPAKA_DEBUG_FULL_LOG_SCOPE;
+            //~ template<
+                //~ typename TExtent,
+                //~ typename TViewSrc,
+                //~ typename TViewDst>
+            //~ struct Enqueue<
+                //~ stream::StreamHipRtSync,
+                //~ mem::view::hip::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent>>
+            //~ {
+                //~ //-----------------------------------------------------------------------------
+                //~ //
+                //~ //-----------------------------------------------------------------------------
+                //~ ALPAKA_FN_HOST static auto enqueue(
+                    //~ stream::StreamHipRtSync &,
+                    //~ mem::view::hip::detail::TaskCopy<dim::DimInt<3u>, TViewDst, TViewSrc, TExtent> const & task)
+                //~ -> void
+                //~ {
+                    //~ ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
-#if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
-                    task.printDebug();
-#endif
-                    auto const & iDstDev(task.m_iDstDevice);
-                    auto const & iSrcDev(task.m_iSrcDevice);
+//~ #if ALPAKA_DEBUG >= ALPAKA_DEBUG_FULL
+                    //~ task.printDebug();
+//~ #endif
+                    //~ auto const & iDstDev(task.m_iDstDevice);
+                    //~ auto const & iSrcDev(task.m_iSrcDevice);
 
-                    if(iDstDev == iSrcDev)
-                    {
-                        // Create the struct describing the copy.
-                        cudaMemcpy3DParms const cudaMemCpy3DParms(
-                            mem::view::cuda::detail::buildCudaMemcpy3DParms(
-                                task));
-                        // Set the current device.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaSetDevice(
-                                iDstDev));
-                        // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy3D(
-                                &cudaMemCpy3DParms));
-                    }
-                    else
-                    {
-                        // Create the struct describing the copy.
-                        cudaMemcpy3DPeerParms const cudaMemCpy3DPeerParms(
-                            mem::view::cuda::detail::buildCudaMemcpy3DPeerParms(
-                                task));
-                        // Initiate the memory copy.
-                        ALPAKA_CUDA_RT_CHECK(
-                            cudaMemcpy3DPeer(
-                                &cudaMemCpy3DPeerParms));
-                    }
-                }
-            };
+                    //~ if(iDstDev == iSrcDev)
+                    //~ {
+                        //~ // Create the struct describing the copy.
+                        //~ hipMemcpy3DParms const hipMemCpy3DParms(
+                            //~ mem::view::hip::detail::buildHipMemcpy3DParms(
+                                //~ task));
+                        //~ // Set the current device.
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipSetDevice(
+                                //~ iDstDev));
+                        //~ // Initiate the memory copy.
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipMemcpy3D(
+                                //~ &hipMemCpy3DParms));
+                    //~ }
+                    //~ else
+                    //~ {
+                        //~ // Create the struct describing the copy.
+                        //~ hipMemcpy3DPeerParms const hipMemCpy3DPeerParms(
+                            //~ mem::view::hip::detail::buildHipMemcpy3DPeerParms(
+                                //~ task));
+                        //~ // Initiate the memory copy.
+                        //~ ALPAKA_HIP_RT_CHECK(
+                            //~ hipMemcpy3DPeer(
+                                //~ &hipMemCpy3DPeerParms));
+                    //~ }
+                //~ }
+            //~ };
         }
     }
 }

@@ -23,12 +23,12 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
 #include <alpaka/dev/Traits.hpp>        // dev::traits::DevType
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
 
 #include <iostream>                     // std::cout
 #include <sstream>                      // std::stringstream
@@ -39,15 +39,15 @@ namespace alpaka
     namespace pltf
     {
         //#############################################################################
-        //! The CUDA RT device manager.
+        //! The HIP RT device manager.
         //#############################################################################
-        class PltfCudaRt
+        class PltfHipRt
         {
         public:
             //-----------------------------------------------------------------------------
             //! Constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_HOST PltfCudaRt() = delete;
+            ALPAKA_FN_HOST PltfHipRt() = delete;
         };
     }
 
@@ -56,13 +56,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CUDA RT device manager device type trait specialization.
+            //! The HIP RT device manager device type trait specialization.
             //#############################################################################
             template<>
             struct DevType<
-                pltf::PltfCudaRt>
+                pltf::PltfHipRt>
             {
-                using type = dev::DevCudaRt;
+                using type = dev::DevHipRt;
             };
         }
     }
@@ -75,7 +75,7 @@ namespace alpaka
             //#############################################################################
             template<>
             struct GetDevCount<
-                pltf::PltfCudaRt>
+                pltf::PltfHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
@@ -97,24 +97,24 @@ namespace alpaka
             //#############################################################################
             template<>
             struct GetDevByIdx<
-                pltf::PltfCudaRt>
+                pltf::PltfHipRt>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto getDevByIdx(
                     std::size_t const & devIdx)
-                -> dev::DevCudaRt
+                -> dev::DevHipRt
                 {
                     ALPAKA_DEBUG_FULL_LOG_SCOPE;
 
-                    dev::DevCudaRt dev;
+                    dev::DevHipRt dev;
 
-                    std::size_t const devCount(pltf::getDevCount<pltf::PltfCudaRt>());
+                    std::size_t const devCount(pltf::getDevCount<pltf::PltfHipRt>());
                     if(devIdx >= devCount)
                     {
                         std::stringstream ssErr;
-                        ssErr << "Unable to return device handle for device " << devIdx << ". There are only " << devCount << " CUDA devices!";
+                        ssErr << "Unable to return device handle for device " << devIdx << ". There are only " << devCount << " HIP devices!";
                         throw std::runtime_error(ssErr.str());
                     }
 
@@ -155,7 +155,7 @@ namespace alpaka
 
                     hipStream_t stream = {};
                     // Create a dummy stream to check if the device is already used by an other process.
-                    // cudaSetDevice never returns an error if another process already uses the selected device and gpu compute mode is set "process exclusive".
+                    // hipSetDevice never returns an error if another process already uses the selected device and gpu compute mode is set "process exclusive".
                     // \TODO: Check if this workaround is needed!
                     if(rc == hipSuccess)
                     {
@@ -172,7 +172,7 @@ namespace alpaka
                     }
                     else
                     {
-                        // Return the previous error from cudaStreamCreate.
+                        // Return the previous error from hipStreamCreate.
                         ALPAKA_HIP_RT_CHECK(
                             rc);
                         // Reset the Error state.

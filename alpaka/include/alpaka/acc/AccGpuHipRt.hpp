@@ -23,21 +23,21 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>                   // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>                   // ALPAKA_FN_*, BOOST_LANG_HIP
 
 // Base classes.
 
-#include <alpaka/workdiv/WorkDivHipBuiltIn.hpp>    // as of now, just a renamed copy of it's CUDA counterpart
-#include <alpaka/idx/gb/IdxGbHipBuiltIn.hpp>       // IdxGbHipBuiltIn (as of now, just a renamed copy of it's CUDA counterpart
-#include <alpaka/idx/bt/IdxBtHipBuiltIn.hpp>	   // IdxBtHipBuiltIn (as of now, just a renamed copy of it's CUDA counterpart)
-#include <alpaka/atomic/AtomicHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
+#include <alpaka/workdiv/WorkDivHipBuiltIn.hpp>    // as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/idx/gb/IdxGbHipBuiltIn.hpp>       // IdxGbHipBuiltIn (as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/idx/bt/IdxBtHipBuiltIn.hpp>	   // IdxBtHipBuiltIn (as of now, just a renamed copy of it's HIP counterpart)
+#include <alpaka/atomic/AtomicHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
 #include <alpaka/atomic/AtomicHierarchy.hpp>    // AtomicHierarchy
-#include <alpaka/math/MathHipBuiltIn.hpp>	// as of now, just a renamed copy of it's CUDA counterpart
-#include <alpaka/block/shared/dyn/BlockSharedMemDynHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
-#include <alpaka/block/shared/st/BlockSharedMemStHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
-#include <alpaka/block/sync/BlockSyncHipBuiltIn.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
-#include <alpaka/rand/RandHipRand.hpp>		// as of now, just a renamed copy of it's CUDA counterpart
-#include <alpaka/time/TimeHipBuiltIn.hpp>          // as of now, just a renamed copy of it's CUDA counterpart
+#include <alpaka/math/MathHipBuiltIn.hpp>	// as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/block/shared/dyn/BlockSharedMemDynHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/block/shared/st/BlockSharedMemStHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/block/sync/BlockSyncHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/rand/RandHipRand.hpp>		// as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/time/TimeHipBuiltIn.hpp>          // as of now, just a renamed copy of it's HIP counterpart
 
 // Specialized traits.
 #include <alpaka/acc/Traits.hpp>                    // acc::traits::AccType
@@ -47,8 +47,8 @@
 #include <alpaka/size/Traits.hpp>                   // size::traits::SizeType
 
 // Implementation details.
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevCudaRt itself is used instead.
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
 
 #include <boost/predef.h>                           // workarounds
 
@@ -63,83 +63,77 @@ namespace alpaka
             typename TSize,
             typename TKernelFnObj,
             typename... TArgs>
-        class ExecGpuCudaRt;
+        class ExecGpuHipRt;
     }
     namespace acc
     {
         //#############################################################################
-        //! The GPU CUDA accelerator.
+        //! The GPU HIP accelerator.
         //!
-        //! This accelerator allows parallel kernel execution on devices supporting CUDA.
+        //! This accelerator allows parallel kernel execution on devices supporting HIP or HCC
         //#############################################################################
         template<
             typename TDim,
             typename TSize>
-        class AccGpuCudaRt final :
-            public workdiv::WorkDivCudaBuiltIn<TDim, TSize>,
-            public idx::gb::IdxGbCudaBuiltIn<TDim, TSize>,
-            public idx::bt::IdxBtCudaBuiltIn<TDim, TSize>,
+        class AccGpuHipRt final :
+            public workdiv::WorkDivHipBuiltIn<TDim, TSize>,
+            public idx::gb::IdxGbHipBuiltIn<TDim, TSize>,
+            public idx::bt::IdxBtHipBuiltIn<TDim, TSize>,
             public atomic::AtomicHierarchy<
-                atomic::AtomicCudaBuiltIn, // grid atomics
-                atomic::AtomicCudaBuiltIn, // block atomics
-                atomic::AtomicCudaBuiltIn  // thread atomics
+                atomic::AtomicHipBuiltIn, // grid atomics
+                atomic::AtomicHipBuiltIn, // block atomics
+                atomic::AtomicHipBuiltIn  // thread atomics
             >,
-            public math::MathCudaBuiltIn,
-            public block::shared::dyn::BlockSharedMemDynCudaBuiltIn,
-            public block::shared::st::BlockSharedMemStCudaBuiltIn,
-            public block::sync::BlockSyncCudaBuiltIn,
-// This is not currently supported by the clang native CUDA compiler.
-#if !BOOST_COMP_CLANG_CUDA
-            public rand::RandCuRand,
-#endif
-            public time::TimeCudaBuiltIn
+            public math::MathHipBuiltIn,
+            public block::shared::dyn::BlockSharedMemDynHipBuiltIn,
+            public block::shared::st::BlockSharedMemStHipBuiltIn,
+            public block::sync::BlockSyncHipBuiltIn,
+//            public rand::RandCuRand,
+            public time::TimeHipBuiltIn
         {
         public:
             //-----------------------------------------------------------------------------
             //! Constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY AccGpuCudaRt(
+            ALPAKA_FN_ACC_HIP_ONLY AccGpuHipRt(
                 vec::Vec<TDim, TSize> const & threadElemExtent) :
-                    workdiv::WorkDivCudaBuiltIn<TDim, TSize>(threadElemExtent),
-                    idx::gb::IdxGbCudaBuiltIn<TDim, TSize>(),
-                    idx::bt::IdxBtCudaBuiltIn<TDim, TSize>(),
+                    workdiv::WorkDivHipBuiltIn<TDim, TSize>(threadElemExtent),
+                    idx::gb::IdxGbHipBuiltIn<TDim, TSize>(),
+                    idx::bt::IdxBtHipBuiltIn<TDim, TSize>(),
                     atomic::AtomicHierarchy<
-                        atomic::AtomicCudaBuiltIn, // atomics between grids
-                        atomic::AtomicCudaBuiltIn, // atomics between blocks
-                        atomic::AtomicCudaBuiltIn  // atomics between threads
+                        atomic::AtomicHipBuiltIn, // atomics between grids
+                        atomic::AtomicHipBuiltIn, // atomics between blocks
+                        atomic::AtomicHipBuiltIn  // atomics between threads
                     >(),
-                    math::MathCudaBuiltIn(),
-                    block::shared::dyn::BlockSharedMemDynCudaBuiltIn(),
-                    block::shared::st::BlockSharedMemStCudaBuiltIn(),
-                    block::sync::BlockSyncCudaBuiltIn(),
-// This is not currently supported by the clang native CUDA compiler.
-#if !BOOST_COMP_CLANG_CUDA
-                    rand::RandCuRand(),
-#endif
-                    time::TimeCudaBuiltIn()
+                    math::MathHipBuiltIn(),
+                    block::shared::dyn::BlockSharedMemDynHipBuiltIn(),
+                    block::shared::st::BlockSharedMemStHipBuiltIn(),
+                    block::sync::BlockSyncHipBuiltIn(),
+//                    rand::RandCuRand(),
+                    time::TimeHipBuiltIn()
             {}
 
         public:
             //-----------------------------------------------------------------------------
             //! Copy constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY AccGpuCudaRt(AccGpuCudaRt const &) = delete;
+            ALPAKA_FN_ACC_HIP_ONLY AccGpuHipRt(AccGpuHipRt const &) = delete;
             //-----------------------------------------------------------------------------
             //! Move constructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY AccGpuCudaRt(AccGpuCudaRt &&) = delete;
+            ALPAKA_FN_ACC_HIP_ONLY AccGpuHipRt(AccGpuHipRt &&) = delete;
             //-----------------------------------------------------------------------------
             //! Copy assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY auto operator=(AccGpuCudaRt const &) -> AccGpuCudaRt & = delete;
+            ALPAKA_FN_ACC_HIP_ONLY auto operator=(AccGpuHipRt const &) -> AccGpuHipRt & = delete;
             //-----------------------------------------------------------------------------
             //! Move assignment operator.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY auto operator=(AccGpuCudaRt &&) -> AccGpuCudaRt & = delete;
+            ALPAKA_FN_ACC_HIP_ONLY auto operator=(AccGpuHipRt &&) -> AccGpuHipRt & = delete;
             //-----------------------------------------------------------------------------
             //! Destructor.
             //-----------------------------------------------------------------------------
-            ALPAKA_FN_ACC_CUDA_ONLY /*virtual*/ ~AccGpuCudaRt() = default;
+            ALPAKA_FN_ACC_HIP_ONLY /*virtual*/ ~AccGpuHipRt() = default;
         };
     }
 
@@ -148,30 +142,30 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator accelerator type trait specialization.
+            //! The GPU HIP accelerator accelerator type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct AccType<
-                acc::AccGpuCudaRt<TDim, TSize>>
+                acc::AccGpuHipRt<TDim, TSize>>
             {
-                using type = acc::AccGpuCudaRt<TDim, TSize>;
+                using type = acc::AccGpuHipRt<TDim, TSize>;
             };
             //#############################################################################
-            //! The GPU CUDA accelerator device properties get trait specialization.
+            //! The GPU HIP accelerator device properties get trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct GetAccDevProps<
-                acc::AccGpuCudaRt<TDim, TSize>>
+                acc::AccGpuHipRt<TDim, TSize>>
             {
                 //-----------------------------------------------------------------------------
                 //
                 //-----------------------------------------------------------------------------
                 ALPAKA_FN_HOST static auto getAccDevProps(
-                    dev::DevCudaRt const & dev)
+                    dev::DevHipRt const & dev)
                 -> acc::AccDevProps<TDim, TSize>
                 {
                     hipDeviceProp_t hipDevProp;
@@ -205,13 +199,13 @@ namespace alpaka
                 }
             };
             //#############################################################################
-            //! The GPU CUDA accelerator name trait specialization.
+            //! The GPU Hip accelerator name trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct GetAccName<
-                acc::AccGpuCudaRt<TDim, TSize>>
+                acc::AccGpuHipRt<TDim, TSize>>
             {
                 //-----------------------------------------------------------------------------
                 //
@@ -219,7 +213,7 @@ namespace alpaka
                 ALPAKA_FN_HOST static auto getAccName()
                 -> std::string
                 {
-                    return "AccGpuCudaRt<" + std::to_string(TDim::value) + "," + typeid(TSize).name() + ">";
+                    return "AccGpuHipRt<" + std::to_string(TDim::value) + "," + typeid(TSize).name() + ">";
                 }
             };
         }
@@ -229,15 +223,15 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator device type trait specialization.
+            //! The GPU HIP accelerator device type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct DevType<
-                acc::AccGpuCudaRt<TDim, TSize>>
+                acc::AccGpuHipRt<TDim, TSize>>
             {
-                using type = dev::DevCudaRt;
+                using type = dev::DevHipRt;
             };
         }
     }
@@ -246,13 +240,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator dimension getter trait specialization.
+            //! The GPU HIP accelerator dimension getter trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct DimType<
-                acc::AccGpuCudaRt<TDim, TSize>>
+                acc::AccGpuHipRt<TDim, TSize>>
             {
                 using type = TDim;
             };
@@ -263,7 +257,7 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator executor type trait specialization.
+            //! The GPU HIP accelerator executor type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
@@ -271,11 +265,11 @@ namespace alpaka
                 typename TKernelFnObj,
                 typename... TArgs>
             struct ExecType<
-                acc::AccGpuCudaRt<TDim, TSize>,
+                acc::AccGpuHipRt<TDim, TSize>,
                 TKernelFnObj,
                 TArgs...>
             {
-                using type = exec::ExecGpuCudaRt<TDim, TSize, TKernelFnObj, TArgs...>;
+                using type = exec::ExecGpuHipRt<TDim, TSize, TKernelFnObj, TArgs...>;
             };
         }
     }
@@ -284,15 +278,15 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The CPU CUDA executor platform type trait specialization.
+            //! The CPU HIP executor platform type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct PltfType<
-                acc::AccGpuCudaRt<TDim, TSize>>
+                acc::AccGpuHipRt<TDim, TSize>>
             {
-                using type = pltf::PltfCudaRt;
+                using type = pltf::PltfHipRt;
             };
         }
     }
@@ -301,13 +295,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator size type trait specialization.
+            //! The GPU HIP accelerator size type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct SizeType<
-                acc::AccGpuCudaRt<TDim, TSize>>
+                acc::AccGpuHipRt<TDim, TSize>>
             {
                 using type = TSize;
             };

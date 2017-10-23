@@ -23,16 +23,16 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
-//#if !BOOST_LANG_CUDA
-//    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
+//#if !defined(__HIPCC__)
+//    #error If ALPAKA_ACC_GPU_HIP_ENABLED is set, the compiler has to support HIP!
 //#endif
 
 #include <alpaka/idx/Traits.hpp>            // idx::getIdx
 
 #include <alpaka/vec/Vec.hpp>               // Vec, offset::getOffsetVecEnd
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's CUDA coutnerpart
+#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
 
 //#include <boost/core/ignore_unused.hpp>   // boost::ignore_unused
 
@@ -43,40 +43,40 @@ namespace alpaka
         namespace bt
         {
             //#############################################################################
-            //! The CUDA accelerator ND index provider.
+            //! The HIP accelerator ND index provider.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
-            class IdxBtCudaBuiltIn
+            class IdxBtHipBuiltIn
             {
             public:
-                using IdxBtBase = IdxBtCudaBuiltIn;
+                using IdxBtBase = IdxBtHipBuiltIn;
 
                 //-----------------------------------------------------------------------------
                 //! Default constructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY IdxBtCudaBuiltIn() = default;
+                ALPAKA_FN_ACC_HIP_ONLY IdxBtHipBuiltIn() = default;
                 //-----------------------------------------------------------------------------
                 //! Copy constructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY IdxBtCudaBuiltIn(IdxBtCudaBuiltIn const &) = delete;
+                ALPAKA_FN_ACC_HIP_ONLY IdxBtHipBuiltIn(IdxBtHipBuiltIn const &) = delete;
                 //-----------------------------------------------------------------------------
                 //! Move constructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY IdxBtCudaBuiltIn(IdxBtCudaBuiltIn &&) = delete;
+                ALPAKA_FN_ACC_HIP_ONLY IdxBtHipBuiltIn(IdxBtHipBuiltIn &&) = delete;
                 //-----------------------------------------------------------------------------
                 //! Copy assignment operator.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY auto operator=(IdxBtCudaBuiltIn const & ) -> IdxBtCudaBuiltIn & = delete;
+                ALPAKA_FN_ACC_HIP_ONLY auto operator=(IdxBtHipBuiltIn const & ) -> IdxBtHipBuiltIn & = delete;
                 //-----------------------------------------------------------------------------
                 //! Move assignment operator.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY auto operator=(IdxBtCudaBuiltIn &&) -> IdxBtCudaBuiltIn & = delete;
+                ALPAKA_FN_ACC_HIP_ONLY auto operator=(IdxBtHipBuiltIn &&) -> IdxBtHipBuiltIn & = delete;
                 //-----------------------------------------------------------------------------
                 //! Destructor.
                 //-----------------------------------------------------------------------------
-                ALPAKA_FN_ACC_CUDA_ONLY /*virtual*/ ~IdxBtCudaBuiltIn() = default;
+                ALPAKA_FN_ACC_HIP_ONLY /*virtual*/ ~IdxBtHipBuiltIn() = default;
             };
         }
     }
@@ -86,13 +86,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator index dimension get trait specialization.
+            //! The GPU HIP accelerator index dimension get trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct DimType<
-                idx::bt::IdxBtCudaBuiltIn<TDim, TSize>>
+                idx::bt::IdxBtHipBuiltIn<TDim, TSize>>
             {
                 using type = TDim;
             };
@@ -103,13 +103,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator block thread index get trait specialization.
+            //! The GPU HIP accelerator block thread index get trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct GetIdx<
-                idx::bt::IdxBtCudaBuiltIn<TDim, TSize>,
+                idx::bt::IdxBtHipBuiltIn<TDim, TSize>,
                 origin::Block,
                 unit::Threads>
             {
@@ -118,8 +118,8 @@ namespace alpaka
                 //-----------------------------------------------------------------------------
                 template<
                     typename TWorkDiv>
-                ALPAKA_FN_ACC_CUDA_ONLY static auto getIdx(
-                    idx::bt::IdxBtCudaBuiltIn<TDim, TSize> const & /*idx*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto getIdx(
+                    idx::bt::IdxBtHipBuiltIn<TDim, TSize> const & /*idx*/,
                     TWorkDiv const &)
                 -> vec::Vec<TDim, TSize>
                 {
@@ -134,13 +134,13 @@ namespace alpaka
         namespace traits
         {
             //#############################################################################
-            //! The GPU CUDA accelerator block thread index size type trait specialization.
+            //! The GPU HIP accelerator block thread index size type trait specialization.
             //#############################################################################
             template<
                 typename TDim,
                 typename TSize>
             struct SizeType<
-                idx::bt::IdxBtCudaBuiltIn<TDim, TSize>>
+                idx::bt::IdxBtHipBuiltIn<TDim, TSize>>
             {
                 using type = TSize;
             };

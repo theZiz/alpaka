@@ -23,10 +23,10 @@
 
 #ifdef ALPAKA_ACC_GPU_HIP_ENABLED
 
-#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, BOOST_LANG_CUDA
+#include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
-#if !BOOST_LANG_CUDA
-    #error If ALPAKA_ACC_GPU_CUDA_ENABLED is set, the compiler has to support CUDA!
+#if !defined(__HIPCC__)
+    #error If ALPAKA_ACC_GPU_HIP_ENABLED is set, the compiler has to support HIP!
 #endif
 
 #include <alpaka/math/round/Traits.hpp> // Round
@@ -43,10 +43,10 @@ namespace alpaka
         //#############################################################################
         //! The standard library round.
         //#############################################################################
-        class RoundCudaBuiltIn
+        class RoundHipBuiltIn
         {
         public:
-            using RoundBase = RoundCudaBuiltIn;
+            using RoundBase = RoundHipBuiltIn;
         };
 
         namespace traits
@@ -57,13 +57,13 @@ namespace alpaka
             template<
                 typename TArg>
             struct Round<
-                RoundCudaBuiltIn,
+                RoundHipBuiltIn,
                 TArg,
                 typename std::enable_if<
                     std::is_floating_point<TArg>::value>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto round(
-                    RoundCudaBuiltIn const & /*round*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto round(
+                    RoundHipBuiltIn const & /*round*/,
                     TArg const & arg)
                 -> decltype(::round(arg))
                 {
@@ -77,13 +77,13 @@ namespace alpaka
             template<
                 typename TArg>
             struct Lround<
-                RoundCudaBuiltIn,
+                RoundHipBuiltIn,
                 TArg,
                 typename std::enable_if<
                     std::is_floating_point<TArg>::value>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto lround(
-                    RoundCudaBuiltIn const & /*lround*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto lround(
+                    RoundHipBuiltIn const & /*lround*/,
                     TArg const & arg)
                 -> long int
                 {
@@ -97,13 +97,13 @@ namespace alpaka
             template<
                 typename TArg>
             struct Llround<
-                RoundCudaBuiltIn,
+                RoundHipBuiltIn,
                 TArg,
                 typename std::enable_if<
                     std::is_floating_point<TArg>::value>::type>
             {
-                ALPAKA_FN_ACC_CUDA_ONLY static auto llround(
-                    RoundCudaBuiltIn const & /*llround*/,
+                ALPAKA_FN_ACC_HIP_ONLY static auto llround(
+                    RoundHipBuiltIn const & /*llround*/,
                     TArg const & arg)
                 -> long int
                 {
