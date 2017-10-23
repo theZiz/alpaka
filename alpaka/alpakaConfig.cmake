@@ -398,21 +398,21 @@ ENDIF()
 IF(ALPAKA_ACC_GPU_HIP_ENABLE)
 
 #CUDA Package import required for using CUDA_VERSION-------------------------------
-    IF(NOT DEFINED ALPAKA_CUDA_VERSION)
-        SET(ALPAKA_CUDA_VERSION 7.0)
-    ENDIF()
+    #~ IF(NOT DEFINED ALPAKA_CUDA_VERSION)
+        #~ SET(ALPAKA_CUDA_VERSION 7.0)
+    #~ ENDIF()
 
-    IF(ALPAKA_CUDA_VERSION VERSION_LESS 7.0)
-        MESSAGE(WARNING "CUDA Toolkit < 7.0 is not supported!")
-        SET(_ALPAKA_FOUND FALSE)
+    #~ IF(ALPAKA_CUDA_VERSION VERSION_LESS 7.0)
+        #~ MESSAGE(WARNING "CUDA Toolkit < 7.0 is not supported!")
+        #~ SET(_ALPAKA_FOUND FALSE)
 
-    ELSE()
-        FIND_PACKAGE(CUDA "${ALPAKA_CUDA_VERSION}")
-        IF(NOT CUDA_FOUND)
-            MESSAGE(WARNING "Optional alpaka dependency CUDA could not be found!")
-	    SET(ALPAKA_ACC_GPU_HIP_ENABLE OFF CACHE BOOL "Enable the HIP GPU back-end" FORCE)
-	ENDIF()
-    ENDIF()		
+    #~ ELSE()
+        #~ FIND_PACKAGE(CUDA "${ALPAKA_CUDA_VERSION}")
+        #~ IF(NOT CUDA_FOUND)
+            #~ MESSAGE(WARNING "Optional alpaka dependency CUDA could not be found!")
+            #~ SET(ALPAKA_ACC_GPU_HIP_ENABLE OFF CACHE BOOL "Enable the HIP GPU back-end" FORCE)
+        #~ ENDIF()
+    #~ ENDIF()
 #----------------------------------------------------------------------------------
 
     IF(NOT DEFINED ALPAKA_HIP_VERSION)
@@ -426,7 +426,7 @@ IF(ALPAKA_ACC_GPU_HIP_ENABLE)
     ELSE()
 #check if find package requires version for HIP
 #        FIND_PACKAGE(HIP "${ALPAKA_HIP_VERSION}")
-	FIND_PACKAGE(HIP)
+	FIND_PACKAGE(HIP MODULE)
         IF(NOT HIP_FOUND)
             MESSAGE(WARNING "Optional alpaka dependency HIP could not be found! HIP back-end disabled!")
             SET(ALPAKA_ACC_GPU_HIP_ENABLE OFF CACHE BOOL "Enable the HIP GPU back-end" FORCE)
@@ -712,6 +712,7 @@ IF(NOT TARGET "alpaka")
         _ALPAKA_LINK_LIBRARIES_PUBLIC
         _ALPAKA_LINK_LIBRARIES_PUBLIC_LENGTH)
     IF(${_ALPAKA_LINK_LIBRARIES_PUBLIC_LENGTH} GREATER 0)
+        LIST(REMOVE_DUPLICATES _ALPAKA_LINK_LIBRARIES_PUBLIC)
         TARGET_LINK_LIBRARIES(
             "alpaka"
             PUBLIC ${_ALPAKA_LINK_LIBRARIES_PUBLIC} ${_ALPAKA_LINK_FLAGS_PUBLIC})
