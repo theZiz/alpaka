@@ -27,17 +27,17 @@
 
 // Base classes.
 
-#include <alpaka/workdiv/WorkDivHipBuiltIn.hpp>    // as of now, just a renamed copy of it's HIP counterpart
-#include <alpaka/idx/gb/IdxGbHipBuiltIn.hpp>       // IdxGbHipBuiltIn (as of now, just a renamed copy of it's HIP counterpart
-#include <alpaka/idx/bt/IdxBtHipBuiltIn.hpp>	   // IdxBtHipBuiltIn (as of now, just a renamed copy of it's HIP counterpart)
-#include <alpaka/atomic/AtomicHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/workdiv/WorkDivHipBuiltIn.hpp>
+#include <alpaka/idx/gb/IdxGbHipBuiltIn.hpp>       // IdxGbHipBuiltIn
+#include <alpaka/idx/bt/IdxBtHipBuiltIn.hpp>	   // IdxBtHipBuiltIn
+#include <alpaka/atomic/AtomicHipBuiltIn.hpp>
 #include <alpaka/atomic/AtomicHierarchy.hpp>    // AtomicHierarchy
-#include <alpaka/math/MathHipBuiltIn.hpp>	// as of now, just a renamed copy of it's HIP counterpart
-#include <alpaka/block/shared/dyn/BlockSharedMemDynHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
-#include <alpaka/block/shared/st/BlockSharedMemStHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
-#include <alpaka/block/sync/BlockSyncHipBuiltIn.hpp>		// as of now, just a renamed copy of it's HIP counterpart
-#include <alpaka/rand/RandHipRand.hpp>		// as of now, just a renamed copy of it's HIP counterpart
-#include <alpaka/time/TimeHipBuiltIn.hpp>          // as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/math/MathHipBuiltIn.hpp>
+#include <alpaka/block/shared/dyn/BlockSharedMemDynHipBuiltIn.hpp>
+#include <alpaka/block/shared/st/BlockSharedMemStHipBuiltIn.hpp>
+#include <alpaka/block/sync/BlockSyncHipBuiltIn.hpp>
+#include <alpaka/rand/RandHipRand.hpp>
+#include <alpaka/time/TimeHipBuiltIn.hpp>
 
 // Specialized traits.
 #include <alpaka/acc/Traits.hpp>                    // acc::traits::AccType
@@ -47,8 +47,8 @@
 #include <alpaka/size/Traits.hpp>                   // size::traits::SizeType
 
 // Implementation details.
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt
+#include <alpaka/core/Hip.hpp>
 
 #include <boost/predef.h>                           // workarounds
 

@@ -35,9 +35,9 @@
 #include <alpaka/stream/Traits.hpp>             // stream::traits::Enqueue
 
 // Implementation details.
-#include <alpaka/acc/AccGpuHipRt.hpp>		// as of now, just a renamed copy of it's HIP counterpart
+#include <alpaka/acc/AccGpuHipRt.hpp>
 
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt
 #include <alpaka/kernel/Traits.hpp>             // kernel::getBlockSharedMemDynSizeBytes
 
 #include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's HIP counterpart)
@@ -51,7 +51,7 @@
     #include <alpaka/workdiv/WorkDivHelpers.hpp>// workdiv::isValidWorkDiv
 #endif
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/core/Hip.hpp>
 
 #include <alpaka/meta/ApplyTuple.hpp>           // meta::apply
 #include <alpaka/meta/Metafunctions.hpp>        // meta::Conjunction
@@ -83,6 +83,7 @@ namespace alpaka
                     typename TKernelFnObj,
                     typename... TArgs>
                 __global__ void hipKernel(
+                    hipLaunchParm lp,
                     vec::Vec<TDim, TSize> const threadElemExtent,
                     TKernelFnObj const kernelFnObj,
                     TArgs ... args)
@@ -402,13 +403,17 @@ namespace alpaka
                     meta::apply(
                         [&](TArgs ... args)
                         {
-                        	hipLaunchKernel(HIP_KERNEL_NAME(exec::hip::detail::hipKernel<TDim, TSize, TKernelFnObj, TArgs...>),
-                        	dim3(gridDim), dim3(blockDim),
-                           	static_cast<std::size_t>(blockSharedMemDynSizeBytes),
+                            hipLaunchKernel(
+                                HIP_KERNEL_NAME(exec::hip::detail::hipKernel< TDim, TSize, TKernelFnObj, TArgs... >),
+                                gridDim,
+                                blockDim,
+                                static_cast<std::size_t>(blockSharedMemDynSizeBytes),
                                 stream.m_spStreamHipRtAsyncImpl->m_HipStream,
-                                    threadElemExtent,
-                                    task.m_kernelFnObj,
-                                    args...);
+                                threadElemExtent,
+                                task.m_kernelFnObj,
+                                args...
+                            );
+
                         },
                         task.m_args);
 
@@ -537,14 +542,16 @@ namespace alpaka
                     meta::apply(
                         [&](TArgs ... args)
                         {
-                            exec::hip::detail::hipKernel<TDim, TSize, TKernelFnObj, TArgs...><<<
+                            hipLaunchKernel(
+                                HIP_KERNEL_NAME(exec::hip::detail::hipKernel< TDim, TSize, TKernelFnObj, TArgs... >),
                                 gridDim,
                                 blockDim,
-                                blockSharedMemDynSizeBytes,
-                                stream.m_spStreamHipRtSyncImpl->m_HipStream>>>(
-                                    threadElemExtent,
-                                    task.m_kernelFnObj,
-                                    args...);
+                                static_cast<std::size_t>(blockSharedMemDynSizeBytes),
+                                stream.m_spStreamHipRtSyncImpl->m_HipStream,
+                                threadElemExtent,
+                                task.m_kernelFnObj,
+                                args...
+                            );
                         },
                         task.m_args);
 

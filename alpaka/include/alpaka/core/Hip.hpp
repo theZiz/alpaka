@@ -83,7 +83,7 @@
 
 #define ALPAKA_HIP_RT_CHECK_IGNORE(error, ...)\
     HIPCHECK(error, ...)
-    
+
 #define ALPAKA_HIP_RT_CHECK(error)\
     ALPAKA_HIP_RT_CHECK_IGNORE(error)
 

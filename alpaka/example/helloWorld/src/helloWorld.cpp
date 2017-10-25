@@ -103,7 +103,7 @@ auto main()
     //using Acc = alpaka::acc::AccGpuCudaRt<Dim, Size>;
     //using Stream = alpaka::stream::StreamCudaRtSync;
     using Acc = alpaka::acc::AccGpuHipRt<Dim, Size>;
-    using Stream = alpaka::stream::StreamHipRtSync;	
+    using Stream = alpaka::stream::StreamHipRtSync;
     using DevAcc = alpaka::dev::Dev<Acc>;
     using DevHost = alpaka::dev::Dev<Host>;
     using PltfHost = alpaka::pltf::Pltf<DevHost>;

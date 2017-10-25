@@ -25,9 +25,9 @@
 
 #include <alpaka/core/Common.hpp>           // ALPAKA_FN_*, __HIPCC__
 
-#include <alpaka/dev/DevHipRt.hpp>	    // dev::DevHipRt (as of now, the hip version itself is used)	
+#include <alpaka/dev/DevHipRt.hpp>	    // dev::DevHipRt (as of now, the hip version itself is used)
 #include <alpaka/vec/Vec.hpp>               // Vec
-#include <alpaka/core/Hip.hpp>		    // hipMalloc,...  		as of now, just a renamed copy of it's HIP coutnerpart	
+#include <alpaka/core/Hip.hpp>		    // hipMalloc,...  		as of now, just a renamed copy of it's HIP coutnerpart
 
 #include <alpaka/dev/Traits.hpp>            // dev::traits::DevType
 #include <alpaka/dim/DimIntegralConst.hpp>  // dim::DimInt<N>

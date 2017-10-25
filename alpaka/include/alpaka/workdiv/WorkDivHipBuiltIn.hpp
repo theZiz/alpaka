@@ -29,7 +29,7 @@
 #include <alpaka/size/Traits.hpp>           // size::Size
 
 #include <alpaka/vec/Vec.hpp>               // Vec, getExtentVecEnd
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/core/Hip.hpp>
 
 //#include <boost/core/ignore_unused.hpp>   // boost::ignore_unused
 

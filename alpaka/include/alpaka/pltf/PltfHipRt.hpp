@@ -26,9 +26,9 @@
 #include <alpaka/core/Common.hpp>       // ALPAKA_FN_*, __HIPCC__
 
 #include <alpaka/dev/Traits.hpp>        // dev::traits::DevType
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/core/Hip.hpp>
 
 #include <iostream>                     // std::cout
 #include <sstream>                      // std::stringstream

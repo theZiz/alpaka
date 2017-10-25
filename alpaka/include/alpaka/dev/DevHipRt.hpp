@@ -30,7 +30,7 @@
 #include <alpaka/pltf/Traits.hpp>       // pltf::traits::PltfType
 #include <alpaka/wait/Traits.hpp>       // CurrentThreadWaitFor
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/core/Hip.hpp>
 
 namespace alpaka
 {

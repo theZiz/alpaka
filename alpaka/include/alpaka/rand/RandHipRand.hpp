@@ -30,9 +30,9 @@
 
 #include <alpaka/rand/Traits.hpp>       // CreateNormalReal, ...
 
-#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>	// DevHipRt
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/core/Hip.hpp>
 
 #include <curand_kernel.h>              // curand_init, ...
 

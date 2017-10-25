@@ -25,7 +25,7 @@
 
 #include <alpaka/core/Common.hpp>               // ALPAKA_FN_*, __HIPCC__
 
-#include <alpaka/dev/DevHipRt.hpp>		// DevHipRt- as of now, this isn't implemented; DevHipRt itself is used instead.
+#include <alpaka/dev/DevHipRt.hpp>		// DevHipRt
 #include <alpaka/dev/Traits.hpp>                // GetDev
 #include <alpaka/event/Traits.hpp>              // event::traits::Test, ...
 #include <alpaka/wait/Traits.hpp>               // CurrentThreadWaitFor
@@ -34,7 +34,7 @@
 #include <alpaka/stream/StreamHipRtSync.hpp>   // stream::StreamHipRtSync (as of now, only a renamed copy of it's HIP counterpart)
 #include <alpaka/stream/StreamHipRtAsync.hpp>  // stream::StreamHipRtAsync (as of now, only a renamed copy of it's HIP counterpart)
 
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/core/Hip.hpp>
 
 #include <stdexcept>                            // std::runtime_error
 #include <memory>                               // std::shared_ptr

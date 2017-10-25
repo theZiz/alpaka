@@ -27,7 +27,7 @@
 
 #include <alpaka/idx/Traits.hpp>            // idx::getIdx
 #include <alpaka/vec/Vec.hpp>               // Vec, offset::getOffsetVecEnd
-#include <alpaka/core/Hip.hpp>		    // as of now, just a renamed copy of it's HIP coutnerpart
+#include <alpaka/core/Hip.hpp>
 
 //#include <boost/core/ignore_unused.hpp>   // boost::ignore_unused
 

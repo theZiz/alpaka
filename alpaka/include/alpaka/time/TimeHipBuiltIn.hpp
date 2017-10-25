@@ -82,7 +82,7 @@ namespace alpaka
                 -> std::uint64_t
                 {
                     // This can be converted to a wall-clock time in seconds by dividing through the shader clock rate given by hipDeviceProp::clockRate.
-                    // This clock rate is double the main clock rate on Fermi and older cards. 
+                    // This clock rate is double the main clock rate on Fermi and older cards.
                     return
                         static_cast<std::uint64_t>(
                             clock64());

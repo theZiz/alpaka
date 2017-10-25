@@ -720,12 +720,12 @@ namespace alpaka
                                 //~ static_cast<std::size_t>(srcPitchBytesY/srcPitchBytesX));
 
                         //~ return hipMemCpy3DPeerParms;
-                    //~ } 
+                    //~ }
                 }
             }
         }
     }
-    
+
     namespace stream
     {
         namespace traits
@@ -1110,5 +1110,5 @@ namespace alpaka
     }
 }
 
-#endif 
+#endif
 
