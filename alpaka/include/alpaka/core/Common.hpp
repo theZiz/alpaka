@@ -59,6 +59,10 @@
 //-----------------------------------------------------------------------------
 #if ALPAKA_ACC_GPU_HIP_ENABLED
     #include <hip/hip_runtime.h>
+    #ifdef __HIP_DEVICE_COMPILE__
+        //HIP defines "abort()" as "{asm("trap;");}", which breaks some kernels
+        #undef abort
+    #endif
     #define BOOST_LANG_HIP 1	// cheap hack
 #else
     #define BOOST_LANG_HIP BOOST_VERSION_NUMBER_NOT_AVAILABLE
@@ -76,7 +80,7 @@
 //-----------------------------------------------------------------------------
 // HIP device architecture detection
 //-----------------------------------------------------------------------------
-#if defined(__HIP_DEVICE_COMPILE__)						       // cheap hack strikes again	
+#if defined(__HIP_DEVICE_COMPILE__)						       // cheap hack strikes again
     #define BOOST_ARCH_HIP_DEVICE 1
 #else
     #define BOOST_ARCH_HIP_DEVICE BOOST_VERSION_NUMBER_NOT_AVAILABLE
