@@ -103,6 +103,12 @@ static auto basicBufferOperationsTest(
         TAcc>(
             stream,
             buf);
+
+    //-----------------------------------------------------------------------------
+    alpaka::test::mem::view::viewTestCopy<
+        TAcc>(
+            stream,
+            buf);
 }
 
 //-----------------------------------------------------------------------------

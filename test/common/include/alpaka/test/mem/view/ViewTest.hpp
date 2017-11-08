@@ -34,6 +34,8 @@
     #pragma clang diagnostic pop
 #endif
 
+#include <type_traits>
+
 namespace alpaka
 {
     //-----------------------------------------------------------------------------
@@ -126,12 +128,20 @@ namespace alpaka
                     //-----------------------------------------------------------------------------
                     // alpaka::mem::view::traits::GetPtrNative
                     {
-                        TElem const * const invalidPtr(nullptr);
-                        BOOST_REQUIRE_NE(
-                            invalidPtr,
-                            alpaka::mem::view::getPtrNative(view));
+                        if(alpaka::extent::getProductOfExtent(view) != static_cast<TSize>(0u))
+                        {
+                            // The pointer is only required to be non-null when the extent is > 0.
+                            TElem const * const invalidPtr(nullptr);
+                            BOOST_REQUIRE_NE(
+                                invalidPtr,
+                                alpaka::mem::view::getPtrNative(view));
+                        }
+                        else
+                        {
+                            // When the extent is 0, the pointer is undefined but it should still be possible get it.
+                            alpaka::mem::view::getPtrNative(view);
+                        }
                     }
-
                     //-----------------------------------------------------------------------------
                     // alpaka::offset::traits::GetOffset
                     {
@@ -385,6 +395,319 @@ namespace alpaka
                             alpaka::test::mem::view::verifyViewsEqual<TAcc>(stream, dstBufAcc, view);
                         }
                     }
+                }
+
+                template <
+                    typename TView,
+                    typename TExtent,
+                    typename SFINAE = void
+                >
+                struct AccessValue;
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct AccessValue<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 3>::type>
+                {
+                    ALPAKA_FN_ACC
+                    auto operator()(
+                        TView & view,
+                        TExtent coord,
+                        TExtent & extent
+                    )
+                    -> alpaka::elem::Elem<TView> &
+                    {
+                        return alpaka::mem::view::getPtrNative(view)[coord[0]+extent[0]*(coord[1]+coord[2]*extent[1])];
+                    }
+                };
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct AccessValue<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 2>::type>
+                {
+                    ALPAKA_FN_ACC
+                    auto operator()(
+                        TView & view,
+                        TExtent coord,
+                        TExtent & extent
+                    )
+                    -> alpaka::elem::Elem<TView> &
+                    {
+                        return alpaka::mem::view::getPtrNative(view)[coord[0]+coord[1]*extent[0]];
+                    }
+                };
+
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct AccessValue<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 1>::type>
+                {
+                    ALPAKA_FN_ACC
+                    auto operator()(
+                        TView & view,
+                        TExtent coord,
+                        TExtent & extent
+                    )
+                    -> alpaka::elem::Elem<TView> &
+                    {
+                        return alpaka::mem::view::getPtrNative(view)[coord[0]];
+                    }
+                };
+
+                template <
+                    typename TView,
+                    typename TExtent,
+                    typename SFINAE = void
+                >
+                struct SetValueToCoord;
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct SetValueToCoord<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 3>::type>
+                {
+                    ALPAKA_FN_HOST
+                    auto operator()(
+                        TView & view,
+                        TExtent & extent
+                    )
+                    -> void
+                    {
+                        using Size = typename TExtent::Val;
+                        for (Size x=0; x<extent[0]; ++x)
+                            for (Size y=0; y<extent[1]; ++y)
+                                for (Size z=0; z<extent[2]; ++z)
+                                    AccessValue<
+                                        TView,
+                                        TExtent
+                                    >()(view,{x,y,z},extent) = x+extent[0]*(y+z*extent[1]);
+
+                    }
+                };
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct SetValueToCoord<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 2>::type>
+                {
+                    ALPAKA_FN_HOST
+                    auto operator()(
+                        TView & view,
+                        TExtent & extent
+                    )
+                    -> void
+                    {
+                        using Size = typename TExtent::Val;
+                        for (Size x=0; x<extent[0]; ++x)
+                            for (Size y=0; y<extent[1]; ++y)
+                                AccessValue<
+                                    TView,
+                                    TExtent
+                                >()(view,{x,y},extent) = x+y*extent[0];
+                    }
+                };
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct SetValueToCoord<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 1>::type>
+                {
+                    ALPAKA_FN_HOST
+                    auto operator()(
+                        TView & view,
+                        TExtent & extent
+                    )
+                    -> void
+                    {
+                        using Size = typename TExtent::Val;
+                        for (Size x=0; x<extent[0]; ++x)
+                            AccessValue<
+                                TView,
+                                TExtent
+                            >()(view,{x},extent) = x;
+                    }
+                };
+
+                template <
+                    typename TView,
+                    typename TExtent,
+                    typename SFINAE = void
+                >
+                struct CompareValueWithCoord;
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct CompareValueWithCoord<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 3>::type>
+                {
+                    ALPAKA_FN_HOST
+                    auto operator()(
+                        TView & view,
+                        TExtent & extent
+                    )
+                    -> void
+                    {
+                        using Size = typename TExtent::Val;
+                        for (Size x=0; x<extent[0]; ++x)
+                            for (Size y=0; y<extent[1]; ++y)
+                                for (Size z=0; z<extent[2]; ++z)
+                                {
+#if BOOST_COMP_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wfloat-equal" // "comparing floating point with == or != is unsafe"
+#endif
+                                    auto result = AccessValue< TView, TExtent >()(view,{x,y,z},extent);
+                                    BOOST_REQUIRE_EQUAL( result, x+extent[0]*(y+z*extent[1]) );
+#if BOOST_COMP_CLANG
+    #pragma clang diagnostic pop
+#endif
+                                }
+                    }
+                };
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct CompareValueWithCoord<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 2>::type>
+                {
+                    ALPAKA_FN_HOST
+                    auto operator()(
+                        TView & view,
+                        TExtent & extent
+                    )
+                    -> void
+                    {
+                        using Size = typename TExtent::Val;
+                        for (Size x=0; x<extent[0]; ++x)
+                            for (Size y=0; y<extent[1]; ++y)
+                            {
+#if BOOST_COMP_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wfloat-equal" // "comparing floating point with == or != is unsafe"
+#endif
+                                auto result = AccessValue< TView, TExtent >()(view,{x,y},extent);
+                                BOOST_REQUIRE_EQUAL( result, x+y*extent[0] );
+#if BOOST_COMP_CLANG
+    #pragma clang diagnostic pop
+#endif
+                            }
+                    }
+                };
+
+                template <
+                    typename TView,
+                    typename TExtent
+                >
+                struct CompareValueWithCoord<
+                    TView,
+                    TExtent,
+                    typename std::enable_if< TExtent::Dim::value == 1>::type>
+                {
+                    ALPAKA_FN_HOST
+                    auto operator()(
+                        TView & view,
+                        TExtent & extent
+                    )
+                    -> void
+                    {
+                        using Size = typename TExtent::Val;
+                        for (Size x=0; x<extent[0]; ++x)
+                        {
+#if BOOST_COMP_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wfloat-equal" // "comparing floating point with == or != is unsafe"
+#endif
+                            auto result = AccessValue< TView, TExtent >()(view,{x},extent);
+                            BOOST_REQUIRE_EQUAL( result, x );
+#if BOOST_COMP_CLANG
+    #pragma clang diagnostic pop
+#endif
+                        }
+                    }
+                };
+                //-----------------------------------------------------------------------------
+                template<
+                    typename TAcc,
+                    typename TView,
+                    typename TStream>
+                static auto viewTestCopy(
+                    TStream & stream,
+                    TView & view)
+                -> void
+                {
+                    //-----------------------------------------------------------------------------
+                    // again for serial cpu buffer
+                    using HostDev = alpaka::dev::DevCpu;
+                    using HostPltf = alpaka::pltf::Pltf<HostDev>;
+                    using HostStream = alpaka::test::stream::DefaultStream<HostDev>;
+
+                    HostDev const hostDev(alpaka::pltf::getDevByIdx<HostPltf>(0u));
+
+                    auto const extent(alpaka::extent::getExtentVec(view));
+
+                    using Size = alpaka::size::Size<TView>;
+                    using Elem = alpaka::elem::Elem<TView>;
+
+                    auto hostView(alpaka::mem::buf::alloc< Elem, Size >(hostDev, extent));
+                    HostStream hostStream(hostDev);
+
+                    std::uint8_t const byte(static_cast<uint8_t>(255u)); //NaN
+                    alpaka::mem::view::set(stream, view, byte, extent);
+
+                    //Fill host buffer with x+extent[0]*(y+z*extent[1])
+                    SetValueToCoord<
+                        typename std::remove_reference<decltype(hostView)>::type,
+                        typename std::remove_reference<decltype(extent)>::type
+                    >()(hostView,extent);
+
+                    alpaka::wait::wait(stream);
+                    alpaka::mem::view::copy(stream, view, hostView, extent);
+                    alpaka::wait::wait(stream);
+                    alpaka::mem::view::set(hostStream, hostView, byte, extent);
+                    alpaka::wait::wait(hostStream);
+                    alpaka::mem::view::copy(stream, hostView, view, extent);
+                    alpaka::wait::wait(stream);
+
+                    //Compare host buffer with x+extent[0]*(y+z*extent[1])
+
+                    CompareValueWithCoord<
+                        typename std::remove_reference<decltype(hostView)>::type,
+                        typename std::remove_reference<decltype(extent)>::type
+                    >()(hostView,extent);
                 }
             }
         }
